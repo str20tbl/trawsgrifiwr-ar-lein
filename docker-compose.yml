@@ -11,6 +11,7 @@ services:
     command: ["revel", "run", "-a", ".", "dev"]
     volumes:
       - "./src/app:/usr/src/app"
+      - "./data/recordings:/data/recordings"
     ports:
       - "7070:9000"
     depends_on:
