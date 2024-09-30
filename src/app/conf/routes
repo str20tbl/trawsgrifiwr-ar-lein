@@ -6,9 +6,11 @@
 module:testrunner
 # module:jobs
 
+POST    /Upload                                 App.Upload
 
 GET     /                                       App.Index
 GET     /Docs                                   App.Docs
+GET     /Correct                                App.Correct
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

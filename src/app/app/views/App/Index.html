@@ -9,7 +9,14 @@
         </div>
         <div class="col-12">
             <div>
-                <input class="form-control form-control-lg" id="formFileLg" type="file">
+                <form action="/Upload" method="post" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <input class="form-control form-control-lg" aria-describedby="button-addon2" id="formFileLg"
+                               name="file" type="file">
+                        <button class="btn btn-outline-primary" type="submit" id="button-addon2"><span class="en">Transcribe</span><span
+                                class="cy">Trawsgrifio</span></button>
+                    </div>
+                </form>
             </div>
         </div>
         <div class="col-12 text-center pt-4">
@@ -18,20 +25,20 @@
         </div>
         <div class="col-12 text-center py-0 my-0">
             <h3 id="countdown"></h3>
-            <button class="rounded-circle text-center btn-lg btn btn-info text-primary btn-soft btn-sm"
+            <button class="rounded-circle text-center btn-lg btn btn-primary"
                     title="Cliciwch i ddechrau recordio"
                     id="start-recording">
-                <i data-feather="mic"></i>
+                <i class="fi fi-mic"></i>
             </button>
-            <button class="rounded-circle text-center btn-lg btn btn-danger btn-soft btn-sm"
+            <button class="rounded-circle text-center btn-lg btn btn-danger"
                     title="Cliciwch i stopio recordio ac i yrru'r sain ar gyfer trawsgrifio"
                     id="stop-recording" disabled="">
-                <i data-feather="stop-circle"></i>
+                <i class="fi fi-arrow-upload"></i>
             </button>
-            <a href="/Docs" class="btn btn-lg rounded-circle btn-primary"
+            <a href="/Docs" class="btn btn-lg rounded-circle btn-outline-info"
                title="Sut i Ddefnyddio'r Trawsgrifiwr"
                id="how-recording">
-                <i data-feather="fi fi-round-question"></i>
+                <i class="fi fi-round-question"></i>
             </a>
             <script>
                 function captureUserMedia(mediaConstraints, successCallback, errorCallback) {
