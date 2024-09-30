@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"app/app/appJobs"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/revel/modules/jobs/app/jobs"
 	"github.com/revel/revel"
 	"os"
 	"path/filepath"
@@ -56,12 +58,15 @@ func (c *App) Upload(file []byte) revel.Result {
 
 	fileUUID := uuid.New()
 	fileExt := filepath.Ext(c.Params.Files["file"][0].Filename)
-	err := os.WriteFile(fmt.Sprintf("/data/recordings/%s.%s", fileUUID.String(), fileExt), file, 0644)
+	filename := fmt.Sprintf("/data/recordings/%s%s", fileUUID.String(), fileExt)
+	err := os.WriteFile(filename, file, 0644)
 	if err != nil {
 		c.Validation.Error("Uwchlwytho ffeil wedi methu || File upload failed.")
 		c.FlashParams()
 		return c.Redirect((*App).Index)
 	}
+
+	jobs.Now(appJobs.ProcessFiles{Filename: filename})
 
 	return c.RenderJSON(FileInfo{
 		ContentType: c.Params.Files["file"][0].Header.Get("Content-Type"),
