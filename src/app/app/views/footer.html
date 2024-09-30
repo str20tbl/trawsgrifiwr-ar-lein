@@ -1,0 +1,134 @@
+<!--suppress ALL -->
+<footer id="footer" class="bg-gray-900 text-white">
+    <div class="container tet-white py-5 flex-row">
+        <div class="row g-4">
+            <div class="col-12  col-md-6 col-lg-4 mb-1 text-center">
+                <img src="/public/images/logo/logo_uti.png" height="92" alt="">
+            </div>
+            <div class="col-12  col-md-6 col-lg-4 mb-1 text-center">
+                <img src="/public/images/logo/logo_bu.svg" height="92" alt="">
+            </div>
+            <div class="col-12  col-md-6 col-lg-4 mb-1 text-center">
+                <img src="/public/images/logo/logo_llyw.png" height="92" alt="">
+            </div>
+        </div>
+    </div>
+    <hr class="bg-gray-500 my-0 container">
+    <div class="container py-5">
+        <div class="row g-4">
+            <div class="col-12 col-lg-4 mb-4">
+                <div class="my-4">
+                    <p class="small mb-0">&copy; <span id="cc-year">1884</span> Prifysgol Bangor University.</p>
+                    <p class="small mb-0 en">All rights reserved.</p>
+                    <p class="small mb-0 cy">Cedwir pob hawl.</p>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4 mb-4">
+                <h3 class="small mb-4 en">GET IN TOUCH</h3>
+                <h3 class="small mb-4 cy">CYSYLLTWCH</h3>
+                <a href="https://github.com/techiaith"
+                   class="btn btn-sm text-white transition-hover-top mb-2 rounded-circle bg-gray-700"
+                   rel="noopener" aria-label="GitHub pages">
+                    <i class="fi fi-social-github"></i>
+                </a>
+                <a href="https://www.facebook.com/UnedTechnolegauIaith"
+                   class="btn btn-sm text-white transition-hover-top mb-2 rounded-circle bg-gray-700"
+                   rel="noopener" aria-label="facebook page">
+                    <i class="fi fi-social-facebook"></i>
+                </a>
+                <a href="https://twitter.com/techiaith"
+                   class="btn btn-sm text-white transition-hover-top mb-2 rounded-circle bg-gray-700"
+                   rel="noopener" aria-label="twitter page">
+                    <i class="fi fi-social-twitter"></i>
+                </a>
+                <a href="https://uk.linkedin.com/company/techiaith"
+                   class="btn btn-sm text-white transition-hover-top mb-2 rounded-circle bg-gray-700"
+                   rel="noopener" aria-label="linkedin page">
+                    <i class="fi fi-social-linkedin"></i>
+                </a>
+                <a href="https://www.youtube.com/@techiaith"
+                   class="btn btn-sm text-white transition-hover-top mb-2 rounded-circle bg-gray-700"
+                   rel="noopener" aria-label="youtube page">
+                    <i class="fi fi-social-youtube"></i>
+                </a>
+            </div>
+            <div class="col-12 col-lg-4 mb-4">
+                <h3 class="small mb-4 en">LEARN MORE</h3>
+                <h3 class="small mb-4 cy">DYSGU MWY</h3>
+                <ul class="list-unstyled">
+                    <li class="list-item mb-2">
+                        <i class="fi fi-arrow-end me-2 smaller"></i>
+                        <a class="text-gray-400 en" href="mailto:techiaith@bangor.ac.uk">Contact</a>
+                        <a class="text-gray-400 cy" href="mailto:techiaith@bangor.ac.uk">Cysylltu</a>
+                    </li>
+                    <li class="list-item mb-2">
+                        <i class="fi fi-arrow-end me-2 smaller"></i>
+                        <a class="text-gray-400 en" href="https://techiaith.bangor.ac.uk/">About Us</a>
+                        <a class="text-gray-400 cy" href="https://techiaith.bangor.ac.uk/">Amdanom</a>
+                    </li>
+                    <li class="list-item mb-2">
+                        <i class="fi fi-arrow-end me-2 smaller"></i>
+                        <a class="text-gray-400 en"
+                           href="https://www.bangor.ac.uk/canolfanbedwyr/docs/ISMS_Doc_5.2_Information_Security_Policy.pdf">
+                            Information Security Policy</a>
+                        <a class="text-gray-400 cy"
+                           href="https://www.bangor.ac.uk/canolfanbedwyr/docs/ISMS_Doc_5.2_Information_Security_Policy.pdf">
+                            Polisi Diogelwch Gwybodaeth</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+</div>
+{{if .DevMode}}
+    {{template "debug.html" .}}
+{{end}}
+{{template "cookies.html" .}}
+<script src="/public/js/core.min.js"></script>
+<script src="/public/js/vendor_bundle.min.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://cdn.WebRTC-Experiment.com/MediaStreamRecorder.js"></script>
+<script src="/public/js/essential_audio.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="/public/js/jquery.json-editor.min.js"></script>
+{{range .moreScripts}}
+    <script src="/public/{{.}}" type="text/javascript" charset="utf-8"></script>
+{{end}}
+<script>
+    $(function () {
+        $("#cc-year").text(new Date().getFullYear());
+        let fIndex = document.cookie.indexOf("lang=");
+        let lang = document.cookie.slice(fIndex+5, fIndex+7);
+        console.log(lang);
+        if (lang === "en") {
+            $(".cy").hide();
+            $(".en").show();
+            $("#lang-sel").text("Cymraeg");
+            document.cookie = "lang=en;secure";
+        } else {
+            $(".en").hide();
+            $(".cy").show();
+            $("#lang-sel").text("English");
+            document.cookie = "lang=cy;secure";
+        }
+        feather.replace();
+    });
+
+    $("#lang-sel").click(function () {
+        if (this.innerHTML === "English") {
+            $(".cy").hide();
+            $(".en").show();
+            this.innerHTML = "Cymraeg"
+            document.cookie = "lang=en;secure";
+        } else {
+            $(".en").hide();
+            $(".cy").show();
+            this.innerHTML = "English"
+            document.cookie = "lang=cy;secure";
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+{{set . "title" "Home"}}
+{{template "header.html" .}}
+
+<div class="container">
+    <div class="row m-5 py-7">
+        <div class="col-12 text-center">
+            <h5 class="en">Click or drop a file here to start!</h5>
+            <h5 class="cy">Cliciwch neu ollwng ffeiliau yma i ddechrau!</h5>
+        </div>
+        <div class="col-12">
+            <div>
+                <input class="form-control form-control-lg" id="formFileLg" type="file">
+            </div>
+        </div>
+        <div class="col-12 text-center pt-4">
+            <h5 class="en">Or record from the browser</h5>
+            <h5 class="cy">Neu recordio o'r porwr</h5>
+        </div>
+        <div class="col-12 text-center py-0 my-0">
+            <h3 id="countdown"></h3>
+            <button class="rounded-circle text-center btn-lg btn btn-info text-primary btn-soft btn-sm"
+                    title="Cliciwch i ddechrau recordio"
+                    id="start-recording">
+                <i data-feather="mic"></i>
+            </button>
+            <button class="rounded-circle text-center btn-lg btn btn-danger btn-soft btn-sm"
+                    title="Cliciwch i stopio recordio ac i yrru'r sain ar gyfer trawsgrifio"
+                    id="stop-recording" disabled="">
+                <i data-feather="stop-circle"></i>
+            </button>
+            <a href="/Docs" class="btn btn-lg rounded-circle btn-primary"
+               title="Sut i Ddefnyddio'r Trawsgrifiwr"
+               id="how-recording">
+                <i data-feather="fi fi-round-question"></i>
+            </a>
+            <script>
+                function captureUserMedia(mediaConstraints, successCallback, errorCallback) {
+                    navigator.mediaDevices.getUserMedia(mediaConstraints).then(successCallback).catch(errorCallback);
+                }
+
+                var mediaConstraints = {
+                    audio: true
+                };
+
+                document.querySelector('#start-recording').onclick = function () {
+                    this.disabled = true;
+                    document.querySelector('#stop-recording').disabled = false;
+                    captureUserMedia(mediaConstraints, onMediaSuccess, onMediaError);
+                    document.getElementById("countdown").textContent = "Paratoi y mic";
+                };
+
+                document.querySelector('#stop-recording').onclick = function () {
+                    this.disabled = true;
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.stop();
+
+                    document.querySelector('#start-recording').disabled = false;
+                };
+
+                var mediaRecorder;
+
+                function onMediaSuccess(stream) {
+                    mediaRecorder = new MediaStreamRecorder(stream);
+                    mediaRecorder.stream = stream;
+
+                    mediaRecorder.recorderType = StereoAudioRecorder;
+                    mediaRecorder.mimeType = 'audio/wav';
+
+                    // don't force any mimeType; use above "recorderType" instead.
+                    // mediaRecorder.mimeType = 'audio/webm'; // audio/ogg or audio/wav or audio/webm
+
+                    mediaRecorder.audioChannels = 1;
+                    mediaRecorder.ondataavailable = function (blob) {
+                        var a = document.createElement('a');
+                        a.target = '_blank';
+                        a.innerHTML = 'Open Recorded Audio No. ' + (index++) + ' (Size: ' + bytesToSize(blob.size) + ') Time Length: ' + getTimeLength(timeInterval);
+
+                        a.href = URL.createObjectURL(blob);
+                        uploadRecording(blob);
+                    };
+
+                    function uploadRecording(blob) {
+                        var xhr = new XMLHttpRequest();
+                        xhr.onload = function (e) {
+                            window.location.assign(e.target.responseURL);
+                        };
+                        var fd = new FormData();
+                        var filename = new Date().toISOString();
+                        fd.append("file", blob, filename);
+                        xhr.open("POST", "/upload_recording", true);
+                        xhr.send(fd);
+                    };
+
+                    var timeInterval = 5000 * 1000;
+
+                    // get blob after specific time interval
+                    mediaRecorder.start(timeInterval);
+                    document.getElementById("countdown").textContent = "Recordio!";
+                    document.querySelector('#stop-recording').disabled = false;
+                }
+
+                function onMediaError(e) {
+                    console.error('media error', e);
+                }
+
+                var audiosContainer = document.getElementById('audios-container');
+                var index = 1;
+
+                // below function via: http://goo.gl/B3ae8c
+                function bytesToSize(bytes) {
+                    var k = 1000;
+                    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                    if (bytes === 0) return '0 Bytes';
+                    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(k)), 10);
+                    return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
+                }
+
+                // below function via: http://goo.gl/6QNDcI
+                function getTimeLength(milliseconds) {
+                    var data = new Date(milliseconds);
+                    return data.getUTCHours() + " hours, " + data.getUTCMinutes() + " minutes and " + data.getUTCSeconds() + " second(s)";
+                }
+
+                window.onbeforeunload = function () {
+                    document.querySelector('#start-recording').disabled = false;
+                };
+                $(window).on('load', function () {
+                    $('#staticBackdrop').modal('show');
+                });
+            </script>
+        </div>
+        <div class="col-12">
+            <div id="uid" class="mt-3">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="gdpr" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Telerau Defnydd</h5>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Diolch am eich diddordeb yn y Trawsgrifiwr Ar-lein - y wefan sy'n eich helpu i greu is-deitlau a
+                    thrawsgrifiadau i ffeil sain neu fideo cyfrwng Cymraeg yn hwylus.
+                </p>
+                <h5><b>Cywirdeb</b></h5>
+                <p>
+                    Nid yw'r Trawsgrifiwr Ar-lein yn adnabod geiriau yn iawn bob amser, ac felly mae'r wefan yn darparu
+                    rhyngwyneb ar gyfer cywiro'r trawsgrifiadau awtomatig.
+                </p>
+                <p>
+                    Os ydych yn cael canlyniadau gwael sydd angen cryn dipyn o waith cywiro, yna gall y canlynol fod o
+                    help. Gofalwch fod y siaradwr/siaradwyr yn llefaru'n ddigon agos at feicroffon sy'n gweithio'n
+                    foddhaol a'u bod yn siarad yn glir heb fod yn rhy gyflym. Peidiwch â disgwyl iddo adnabod geiriau
+                    Saesneg neu eiriau mwy llafar (fel rîli, tsips, neith).
+                </p>
+                <p>
+                    Os nad ydi'r Trawsgrifiwr Ar-lein i weld yn adnabod eich llais yn dda, mae'n bosib bod eich acen
+                    neu'ch llais yn anghyfarwydd i'r peiriant. Un ffordd o wneud yn siŵr y bydd fersiwn diweddarach o'r
+                    Trawsgrifiwr Ar-lein yn adnabod eich llais yn well yw drwy rannu eich data gyda ni (gweler isod)
+                    ac/neu recordio rhai brawddegau ar gwefan Gymraeg Mozilla Common Voice. <a
+                        href="https://commonvoice.mozilla.org/cy">https://commonvoice.mozilla.org/cy</a>
+                </p>
+                <h5><b>Preifatrwydd</b></h5>
+                <p>
+                    Hoffem i chi fod yn ymwybodol, wrth i chi ddefnyddio Trawsgrifiwr Ar-lein, y bydd eich ffeil sain,
+                    fideo neu fideo YouTube yn cael ei danfon at ein gweinydd(ion) ni er mwyn trawsgrifio'r lleferydd i
+                    chi. Mae'r Trawsgrifiwr Ar-lein yn cadw copïau o'r sain, trawsgrifiadau awtomatig yn ogystal ag
+                    unrhyw gywiriadau hyd at 30 diwrnod er mwyn rhoi amser digonol i chi ddefnyddio'r gwasanaeth a
+                    chywiro pob awgrym. Ar ôl 30 diwrnod bydd pob ffeil gysylltiedig â'ch cais gwreiddiol yn cael ei
+                    dileu oddi ar ein gweinydd(ion). Byddwn yn parchu'n llawn eich preifatrwydd a hawliau hawlfraint ac
+                    ni fyddwn yn defnyddio eich data at unrhyw ddibenion eraill y tu hwnt i ddarparu gwasanaeth
+                    Trawsgrifiwr Ar-lein.
+                </p>
+                <h5><b>Rhannu Data</b></h5>
+                <p>
+                    Os ydych chi'n fodlon i ni ddefnyddio eich data, a bod modd i chi fel awdurdod neu berchennog
+                    hawlfraint roi caniatâd i ni ddefnyddio'r data hynny er mwyn adeiladu corpws a gwella'r trawsgrifiwr
+                    at eich dibenion chi ac eraill yn ogystal â thechnolegau iaith Cymraeg yn gyffredinol, yna
+                    cysylltwch â ni drwy <a href="mailto:techiaith@bangor.ac.uk">techiaith@bangor.ac.uk</a> i drafod sut
+                    y gallwn ni gydweithio.
+                </p>
+                <p>
+                    <b>Drwy roi ffeil sain, fideo neu ddolen YouTube i mewn i'r wefan rydych chi'n derbyn y telerau
+                        hyn.</b>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-cookie-accept" data-bs-dismiss="modal">Derbyn</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="span6">
+            {{template "flash.html" .}}
+        </div>
+    </div>
+</div>
+
+{{template "footer.html" .}}
