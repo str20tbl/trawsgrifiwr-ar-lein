@@ -1,0 +1,59 @@
+<style>
+	#sidebar {
+		position: absolute;
+		right: 0;
+		top: 120px;
+		max-width: 75%;
+		z-index: 10000;
+		background-color: #fee;
+		border: thin solid grey;
+		padding: 10px;
+	}
+	#toggleSidebar {
+		position: absolute;
+		right: 0;
+		top: 90px;
+		background-color: #fee;
+	}
+
+</style>
+<div id="sidebar" style="display:none;">
+	<h4>Available pipelines</h4>
+	<dl>
+	{{ range $index, $value := .}}
+		<dt>{{$index}}</dt>
+		<dd>{{$value}}</dd>
+	{{end}}
+	</dl>
+	<h4>Flash</h4>
+	<dl>
+	{{ range $index, $value := .flash}}
+		<dt>{{$index}}</dt>
+		<dd>{{$value}}</dd>
+	{{end}}
+	</dl>
+
+	<h4>Errors</h4>
+	<dl>
+	{{ range $index, $value := .errors}}
+		<dt>{{$index}}</dt>
+		<dd>{{$value}}</dd>
+	{{end}}
+	</dl>
+</div>
+<a id="toggleSidebar" href="#" class="toggles bg-white"><i data-feather="settings"></i></a>
+
+<script>
+	let sidebar = 0;
+	$('#toggleSidebar').click(function() {
+		if (sidebar === 1) {
+			$('#sidebar').hide();
+			sidebar = 0;
+		}
+		else {
+			$('#sidebar').show();
+			sidebar = 1;
+		}
+    return false;
+	});
+</script>
