@@ -23,9 +23,19 @@ func (c *App) Docs() revel.Result {
 	return c.Render()
 }
 
-func (c *App) PlayAudio(uuid string) {
-	audio, _ := os.Open(fmt.Sprintf("/data/recordings/%s.json", uuid))
-	c.RenderFile(audio, revel.Attachment)
+func (c *App) Editor(uuid string) revel.Result {
+	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uuid))
+	var data appJobs.ProcessFiles
+	err := json.Unmarshal(plan, &data)
+	if err != nil {
+		revel.AppLog.Error("Unable to open JSON")
+	}
+	return c.Render(data)
+}
+
+func (c *App) PlayAudio(uuid string) revel.Result {
+	audio, _ := os.Open(fmt.Sprintf("/data/recordings/%s.mp3", uuid))
+	return c.RenderFile(audio, revel.Attachment)
 }
 
 func (c *App) Correct(uuid string) revel.Result {

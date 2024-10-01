@@ -12,6 +12,7 @@ GET     /                                       App.Index
 GET     /Docs                                   App.Docs
 GET     /Correct                                App.Correct
 GET     /PlayAudio                              App.PlayAudio
+GET     /Editor                                 App.Editor
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

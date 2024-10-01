@@ -25,7 +25,7 @@ type ProcessFiles struct {
 }
 
 func (p ProcessFiles) Run() {
-	revel.AppLog.Info(p.Filename)
+	//revel.AppLog.Info(p.Filename)
 	mp3Filename := fmt.Sprintf("/data/recordings/%s.mp3", p.UUID)
 	p.Status = runCommand(fmt.Sprintf("ffmpeg -i %s -vn -ar 44100 -ac 1 -b:a 192k %s", p.Filename, mp3Filename))
 	p.Step += 1
@@ -37,12 +37,12 @@ func (p ProcessFiles) Run() {
 		if err != nil {
 			revel.AppLog.Error("Failed to transcribe file", err)
 		}
-		revel.AppLog.Infof("%+s", resp["id"])
+		//revel.AppLog.Infof("%+s", resp["id"])
 		transcriptID := fmt.Sprintf("%s", resp["id"])
 		for {
 			time.Sleep(30 * time.Second)
 			gotTranscript, err := getStatus(transcriptID)
-			revel.AppLog.Infof("Checking transcript %s ready: %t", transcriptID, gotTranscript)
+			//revel.AppLog.Infof("Checking transcript %s ready: %t", transcriptID, gotTranscript)
 			if err != nil {
 				revel.AppLog.Error("Failed to transcribe file", err)
 			}
@@ -87,11 +87,11 @@ func (p ProcessFiles) WriteJSON() {
 func runCommand(cmd string) bool {
 	cmdOut, err := exec.Command("/bin/sh", "-c", cmd).Output()
 	if err != nil {
-		revel.AppLog.Info(cmd)
-		revel.AppLog.Info(string(cmdOut), err)
+		revel.AppLog.Error(cmd)
+		revel.AppLog.Error(string(cmdOut), err)
 		return false
 	}
-	revel.AppLog.Info(string(cmdOut))
+	//revel.AppLog.Info(string(cmdOut))
 	return true
 }
 
@@ -199,7 +199,7 @@ func getVAD(uuid string) (Transcript, error) {
 	if err = json.Unmarshal(body, &response); err != nil {
 		return nil, err
 	}
-	revel.AppLog.Infof("%+s", response)
+	//revel.AppLog.Infof("%+s", response)
 
 	return response, nil
 }

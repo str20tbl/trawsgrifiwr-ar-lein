@@ -42,15 +42,15 @@
             </div>
         </div>
     </div>
-    {{template "App/editor.html" .}}
 </div>
 <script type="text/javascript" charset="utf-8">
     // Reload the whole messages panel
+    var doOnce = true;
     var refresh = function () {
         $('#thread').load('/Correct/?uuid={{.data.UUID}} #thread', function () {
-            if ($("#step-no").text() === "4") {
+            if ($("#step-no").text() === "4" && doOnce) {
                 $("#timeline").hide();
-                $("#editor").show();
+                window.location.href = "/Editor?uuid={{.data.UUID}}"
             }
             let fIndex = document.cookie.indexOf("lang=");
             let lang = document.cookie.slice(fIndex + 5, fIndex + 7);
