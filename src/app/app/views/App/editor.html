@@ -1,0 +1,10 @@
+<div class="hide" id="editor">
+    {{range .data.Transcripts}}
+    <div class="mb-3 row">
+        <label for="staticEmail2" class="col-sm-2 col-form-label ms-3">{{.Start}} - {{.End}}</label>
+        <div class="col-sm-9">
+            <input type="text" readonly class="form-control" id="staticEmail2" value="{{.Text}}">
+        </div>
+    </div>
+    {{end}}
+</div>

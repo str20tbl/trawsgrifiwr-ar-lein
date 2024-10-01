@@ -11,6 +11,7 @@ POST    /Upload                                 App.Upload
 GET     /                                       App.Index
 GET     /Docs                                   App.Docs
 GET     /Correct                                App.Correct
+GET     /PlayAudio                              App.PlayAudio
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
