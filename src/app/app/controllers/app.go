@@ -23,6 +23,11 @@ func (c *App) Docs() revel.Result {
 	return c.Render()
 }
 
+func (c *App) PlayAudio(uuid string) {
+	audio, _ := os.Open(fmt.Sprintf("/data/recordings/%s.json", uuid))
+	c.RenderFile(audio, revel.Attachment)
+}
+
 func (c *App) Correct(uuid string) revel.Result {
 	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uuid))
 	var data appJobs.ProcessFiles
@@ -77,6 +82,4 @@ func (c *App) Upload(file []byte) revel.Result {
 	jobs.Now(job)
 
 	return c.Redirect((*App).Correct, fileUUID.String())
-
-	//return c.RenderJSON(FileInfo)
 }
