@@ -5,7 +5,7 @@
         <span class="en">File Processing Progress</span>
         <span class="fw-lighter float-end">{{.data.OriginalFilename}}</span>
         <div class="progress mt-2">
-            <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: 10%"
+            <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: {{percent .data.Step 3}}%"
                  aria-valuenow="10"
                  aria-valuemin="0" aria-valuemax="100"></div>
         </div>

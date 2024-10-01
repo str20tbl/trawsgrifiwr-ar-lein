@@ -1,9 +1,9 @@
 package app
 
 import (
-	"github.com/revel/revel"
+	"fmt"
 	_ "github.com/revel/modules"
-
+	"github.com/revel/revel"
 )
 
 var (
@@ -30,6 +30,13 @@ func init() {
 		revel.CompressFilter,          // Compress the result.
 		revel.BeforeAfterFilter,       // Call the before and after filter functions
 		revel.ActionInvoker,           // Invoke the action.
+	}
+	revel.TemplateFuncs["percent"] = func(input, total int) string {
+		sum := 0.0
+		if total > 0 {
+			sum = float64(input) / float64(total) * 100
+		}
+		return fmt.Sprintf("%.0f", sum)
 	}
 
 	// Register startup functions with OnAppStart
