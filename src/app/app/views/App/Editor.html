@@ -1,0 +1,61 @@
+{{set . "title" "Home"}}
+{{template "header.html" .}}
+<div class="container">
+    <div class="row m-5 py-7">
+        <div class="row">
+            <div class="col-12">
+                <span class="fw-lighter float-end">{{.data.UUID}}</span>
+                <h3 class="cy">Cywiro</h3>
+                <h3 class="en">Correct</h3>
+            </div>
+            <div class="col-12" style="min-height: 400px;">
+                <div id="editor">
+                    <audio style="width: 100%;" id="audiofile" src="/PlayAudio?uuid={{.data.UUID}}" controls></audio>
+                    <br>
+
+                    <div id="subtitles">
+                        {{range $i, $el := .data.Transcripts}}
+                        <div class="mb-3 row hide transcript" id="{{$i}}_tran">
+                            <label for="staticEmail2" class="col-sm-2 col-form-label ms-3">{{$el.Start}} -
+                                {{$el.End}}</label>
+                            <div class="col-sm-9">
+                                <input type="text" readonly class="form-control" id="staticEmail2" value="{{$el.Text}}">
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                    <script>
+                        (function (win, doc) {
+                            var audioPlayer = doc.getElementById("audiofile");
+                            var subtitles = doc.getElementById("subtitles");
+                            var syncData = {{.data.Transcripts}};
+
+                            audioPlayer.addEventListener("timeupdate", function (e) {
+                                syncData.forEach(function (element, index, array) {
+                                    if (audioPlayer.currentTime >= element.start && audioPlayer.currentTime <= element.end) {
+                                        $(".transcript").hide();
+                                        if (index > 0) {
+                                            $("#" + (index - 1) + "_tran").show();
+                                        }
+                                        $("#" + index + "_tran").show();
+                                        if (index < syncData.length) {
+                                            $("#" + (index + 1) + "_tran").show();
+                                        }
+                                    }
+                                });
+                            });
+                        }(window, document));
+                    </script>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="span6">
+                    {{template "flash.html" .}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{template "footer.html" .}}
