@@ -18394,7 +18394,7 @@ if ( window.NodeList && !NodeList.prototype.forEach ) {
 
 
           if(label_orig == '') {
-              label_orig = _t.next('.custom-file-label').html() || 'Choose file';
+              label_orig = _t.next('.custom-file-label').html() || 'Dewis Ffeil';
               _t.next('.custom-file-label').attr('data-orig', label_orig);
           }
 
@@ -18448,7 +18448,7 @@ if ( window.NodeList && !NodeList.prototype.forEach ) {
               file_size_kb_bulk   = 0;
 
 
-          // set back "Choose file" label
+          // set back "Dewis Ffeil" label
           if(is_multiple !== false)
               _t.next('.custom-file-label').html(label_orig);
 
@@ -18724,8 +18724,8 @@ if ( window.NodeList && !NodeList.prototype.forEach ) {
             // remove the entire container holding cloned/inputs
             jQuery('#js_advanced_form_identifier_'+fileInputIdentifier).remove();
 
-            // set back "Choose file" label
-            var label_orig = _t.next('.custom-file-label').attr('data-orig') || 'Choose file';
+            // set back "Dewis Ffeil" label
+            var label_orig = _t.next('.custom-file-label').attr('data-orig') || 'Dewis Ffeil';
                 _t.next('.custom-file-label').html(label_orig);
 
             window.fileInventory[fileInputIdentifier] = [];
@@ -19718,8 +19718,8 @@ if ( window.NodeList && !NodeList.prototype.forEach ) {
                 // restoring back to original
                 _t.val('').attr('name', input_name).removeAttr('data-orig-name');
 
-                // set back "Choose file" label
-                var label_orig = _t.next('.custom-file-label').attr('data-orig') || 'Choose file';
+                // set back "Dewis Ffeil" label
+                var label_orig = _t.next('.custom-file-label').attr('data-orig') || 'Dewis Ffeil';
                 _t.next('.custom-file-label').html(label_orig);
 
                 // replace with a clone!

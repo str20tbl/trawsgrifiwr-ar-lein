@@ -1,11 +1,12 @@
 {{if .flash.success}}
-<div class="alert alert-success">
+<div class="alert alert-success alert-dismissible fade show" role="alert">
 	{{.flash.success}}
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {{end}}
 
 {{if or .errors .flash.error}}
-<div class="alert alert-danger">
+<div class="alert alert-dark alert-dismissible fade show" role="alert">
 	{{if .flash.error}}
 		{{.flash.error}}
 	{{end}}
@@ -14,5 +15,6 @@
 			<li>{{.}}</li>
 		{{end}}
 	</ul>
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {{end}}

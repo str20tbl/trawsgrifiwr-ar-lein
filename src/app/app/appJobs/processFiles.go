@@ -1,20 +1,54 @@
 package appJobs
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/revel/revel"
+	"os"
 	"os/exec"
 )
 
 type ProcessFiles struct {
-	Filename string
+	ContentType      string
+	OriginalFilename string
+	Filename         string
+	UUID             string
+	Size             float64
+	Step             int
+	Status           bool
 }
 
 func (p ProcessFiles) Run() {
 	revel.AppLog.Info(p.Filename)
-	success := runCommand(fmt.Sprintf("ffmpeg -i input.wav -vn -ar 44100 -ac 2 -b:a 192k %s", p.Filename))
-	if !success {
+	p.Status = runCommand(fmt.Sprintf("ffmpeg -i %s -vn -ar 44100 -ac 2 -b:a 192k %s", p.Filename, fmt.Sprintf("/data/recordings/%s.mp3", p.UUID)))
+	p.Step += 1
+	p.WriteJSON()
+	if !p.Status {
 		revel.AppLog.Info("Failed to convert file")
+	} else {
+
+	}
+}
+
+func (p ProcessFiles) WriteJSON() {
+	filepath := fmt.Sprintf("/data/recordings/%s.json", p.UUID)
+	f, err := os.Create(filepath)
+	if err != nil {
+		revel.AppLog.Error("Unable to create file to save JSON", err)
+	}
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			revel.AppLog.Error("Unable to close JSON file", err)
+		}
+	}()
+	asJSON, err := json.MarshalIndent(p, "", "\t")
+	if err != nil {
+		revel.AppLog.Error("Unable to marshal JSON", err)
+	}
+	_, err = f.Write(asJSON)
+	if err != nil {
+		revel.AppLog.Error("Unable to save JSON", err)
 	}
 }
 

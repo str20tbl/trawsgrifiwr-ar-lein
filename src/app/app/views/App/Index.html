@@ -94,7 +94,7 @@
                         var fd = new FormData();
                         var filename = new Date().toISOString();
                         fd.append("file", blob, filename);
-                        xhr.open("POST", "/upload_recording", true);
+                        xhr.open("POST", "/Upload", true);
                         xhr.send(fd);
                     };
 

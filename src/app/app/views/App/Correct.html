@@ -3,14 +3,16 @@
 
 <div class="container">
     <div class="row m-5 pt-5">
-        <div class="col-12 text-center">
-            <h5 class="cy">Cywiro</h5>
-            <h5 class="en">Correct</h5>
+        <div class="col-12">
+            <span class="fw-lighter float-end">{{.data.UUID}}</span>
+            <h3 class="cy">Cywiro</h3>
+            <h3 class="en">Correct</h3>
+        </div>
+        <div class="col-12 pt-5">
+            {{template "App/timeline.html" .}}
         </div>
     </div>
 </div>
-
-
 <div class="container">
     <div class="row">
         <div class="span6">
