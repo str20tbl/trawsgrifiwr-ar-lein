@@ -16358,8 +16358,7 @@ aside .nav-item.nav-item-extended.active > .aside-item {
   top: 7px;
   bottom: 7px;
   height: calc(100% - (4px + 3));
-  background-color: #f1f4f8;
-  left: 100px; }
+  background-color: #f1f4f8; }
 
 .timeline-container i.badge {
   width: 17px;
@@ -16369,7 +16368,7 @@ aside .nav-item.nav-item-extended.active > .aside-item {
   position: absolute;
   padding: 0;
   top: 7px;
-  left: 93.5px; }
+  left: -6.5px; }
 
 .timeline-container i.badge:after {
   content: '';
@@ -16387,7 +16386,6 @@ aside .nav-item.nav-item-extended.active > .aside-item {
   position: relative;
   display: block;
   padding-left: 24px;
-  margin-left: 100px;
   border-left: transparent 4px solid; }
 
 /* invert */

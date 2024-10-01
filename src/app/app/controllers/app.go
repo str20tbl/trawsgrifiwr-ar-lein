@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"app/app/appJobs"
+	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/revel/modules/jobs/app/jobs"
@@ -22,8 +23,14 @@ func (c *App) Docs() revel.Result {
 	return c.Render()
 }
 
-func (c *App) Correct() revel.Result {
-	return c.Render()
+func (c *App) Correct(uuid string) revel.Result {
+	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uuid))
+	var data appJobs.ProcessFiles
+	err := json.Unmarshal(plan, &data)
+	if err != nil {
+		revel.AppLog.Error("Unable to open JSON")
+	}
+	return c.Render(data)
 }
 
 const (
@@ -33,21 +40,13 @@ const (
 	GB
 )
 
-type FileInfo struct {
-	ContentType string
-	Filename    string
-	UUID        string
-	Size        float64
-	Status      string `json:",omitempty"`
-}
-
 func (c *App) Upload(file []byte) revel.Result {
 	// Validation rules.
 	c.Validation.Required(file)
 	c.Validation.MinSize(file, 2*KB).
-		Message("Minimum a file size of 2KB expected")
+		Message(`Minimum file size 2KB`)
 	c.Validation.MaxSize(file, 200*MB).
-		Message("File cannot be larger than 200MB")
+		Message(`Max file size 200MB`)
 
 	// Handle errors.
 	if c.Validation.HasErrors() {
@@ -65,14 +64,19 @@ func (c *App) Upload(file []byte) revel.Result {
 		c.FlashParams()
 		return c.Redirect((*App).Index)
 	}
+	job := appJobs.ProcessFiles{
+		ContentType:      c.Params.Files["file"][0].Header.Get("Content-Type"),
+		OriginalFilename: c.Params.Files["file"][0].Filename,
+		Filename:         filename,
+		UUID:             fileUUID.String(),
+		Size:             float64(len(file)) / float64(KB),
+		Step:             1,
+		Status:           true,
+	}
+	job.WriteJSON()
+	jobs.Now(job)
 
-	jobs.Now(appJobs.ProcessFiles{Filename: filename})
+	return c.Redirect((*App).Correct, fileUUID.String())
 
-	return c.RenderJSON(FileInfo{
-		ContentType: c.Params.Files["file"][0].Header.Get("Content-Type"),
-		Filename:    c.Params.Files["file"][0].Filename,
-		UUID:        fileUUID.String(),
-		Size:        float64(len(file)) / float64(KB),
-		Status:      "Successfully uploaded!",
-	})
+	//return c.RenderJSON(FileInfo)
 }
