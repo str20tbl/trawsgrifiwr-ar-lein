@@ -15,6 +15,7 @@ GET     /Correct                                App.Correct
 GET     /PlayAudio                              App.PlayAudio
 GET     /Editor                                 App.Editor
 GET     /ExportSRT                              App.ExportSRT
+GET     /MergeSegment                           App.MergeSegment
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

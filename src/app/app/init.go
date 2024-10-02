@@ -39,6 +39,10 @@ func init() {
 		return fmt.Sprintf("%.0f", sum)
 	}
 
+	revel.TemplateFuncs["add"] = func(a, b int) string {
+		return fmt.Sprintf("%d", a+b)
+	}
+
 	// Register startup functions with OnAppStart
 	// revel.DevMode and revel.RunMode only work inside of OnAppStart. See Example Startup Script
 	// ( order dependent )
