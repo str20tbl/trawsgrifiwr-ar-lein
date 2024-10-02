@@ -70,6 +70,29 @@ func (p ProcessFiles) Run() {
 		time.Sleep(5 * time.Second)
 		p.Step += 1
 		p.WriteJSON()
+		p.SaveBackup()
+	}
+}
+
+func (p ProcessFiles) SaveBackup() {
+	filepath := fmt.Sprintf("/data/recordings/%s.backup.json", p.UUID)
+	f, err := os.Create(filepath)
+	if err != nil {
+		revel.AppLog.Error("Unable to create file to save JSON", err)
+	}
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			revel.AppLog.Error("Unable to close JSON file", err)
+		}
+	}()
+	asJSON, err := json.MarshalIndent(p, "", "\t")
+	if err != nil {
+		revel.AppLog.Error("Unable to marshal JSON", err)
+	}
+	_, err = f.Write(asJSON)
+	if err != nil {
+		revel.AppLog.Error("Unable to save JSON", err)
 	}
 }
 

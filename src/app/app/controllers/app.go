@@ -25,6 +25,12 @@ func (c *App) Docs() revel.Result {
 	return c.Render()
 }
 
+func (c *App) RevertJSON(uuid string) revel.Result {
+	backup := fetchBackup(uuid)
+	backup.WriteJSON()
+	return c.Redirect(c.Request.Referer())
+}
+
 func (c *App) MergeSegment(uuid string, idA, idB int) revel.Result {
 	data := fetchJSON(uuid)
 	data.Transcripts[idA].End = data.Transcripts[idB].End
@@ -38,6 +44,15 @@ func (c *App) MergeSegment(uuid string, idA, idB int) revel.Result {
 	return c.Redirect(c.Request.Referer())
 }
 
+func fetchBackup(uuid string) (data appJobs.ProcessFiles) {
+	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.backup.json", uuid))
+	err := json.Unmarshal(plan, &data)
+	if err != nil {
+		revel.AppLog.Error("Unable to open JSON")
+	}
+	return
+}
+
 func fetchJSON(uuid string) (data appJobs.ProcessFiles) {
 	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uuid))
 	err := json.Unmarshal(plan, &data)
@@ -48,12 +63,7 @@ func fetchJSON(uuid string) (data appJobs.ProcessFiles) {
 }
 
 func (c *App) ExportSRT(uuid string) revel.Result {
-	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uuid))
-	var data appJobs.ProcessFiles
-	err := json.Unmarshal(plan, &data)
-	if err != nil {
-		revel.AppLog.Error("Unable to open JSON")
-	}
+	data := fetchJSON(uuid)
 	srtData := ""
 	for _, el := range data.Transcripts {
 		start := time.Unix(0, 0).UTC().Add(time.Duration(el.Start * float64(time.Second))).Format("T15:04:05.999Z")
@@ -87,12 +97,7 @@ func (c *App) UpdateJSON() revel.Result {
 }
 
 func (c *App) Editor(uuid string) revel.Result {
-	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uuid))
-	var data appJobs.ProcessFiles
-	err := json.Unmarshal(plan, &data)
-	if err != nil {
-		revel.AppLog.Error("Unable to open JSON")
-	}
+	data := fetchJSON(uuid)
 	return c.Render(data)
 }
 
@@ -102,12 +107,7 @@ func (c *App) PlayAudio(uuid string) revel.Result {
 }
 
 func (c *App) Correct(uuid string) revel.Result {
-	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uuid))
-	var data appJobs.ProcessFiles
-	err := json.Unmarshal(plan, &data)
-	if err != nil {
-		revel.AppLog.Error("Unable to open JSON")
-	}
+	data := fetchJSON(uuid)
 	return c.Render(data)
 }
 

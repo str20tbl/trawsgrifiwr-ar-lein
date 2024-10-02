@@ -18,9 +18,24 @@
                         <i data-feather="download"></i>
                         SRT
                     </button>
+                    <button type="submit" id="backup" class="btn btn-sm btn-outline-danger">
+                        <i data-feather="refresh-cw"></i>
+                        <span class="cy">Agor</span><span class="en">open</span> Backup
+                    </button>
+                    <form action="/RevertJSON" method="get" id="backup-form">
+                        <input type="hidden" name="uuid" value="{{.data.UUID}}">
+                    </form>
                     <form action="/ExportSRT" method="get" id="srt-form">
                         <input type="hidden" name="uuid" value="{{.data.UUID}}">
                     </form>
+                    <script>
+                        $("#export").click(function () {
+                            $("#srt-form").submit();
+                        });
+                        $("#backup").click(function () {
+                            $("#backup-form").submit();
+                        });
+                    </script>
                 </div>
             </div>
             <div class="col-12" style="min-height: 400px;">
@@ -83,9 +98,6 @@
                                     url: "/UpdateJSON",
                                     contentType: "application/json"
                                 });
-                            });
-                            $("#export").click(function () {
-                                $("#srt-form").submit();
                             });
                             audioPlayer.addEventListener("timeupdate", function (e) {
                                 syncData.forEach(function (element, index, array) {
