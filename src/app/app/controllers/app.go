@@ -25,6 +25,28 @@ func (c *App) Docs() revel.Result {
 	return c.Render()
 }
 
+func (c *App) MergeSegment(uuid string, idA, idB int) revel.Result {
+	data := fetchJSON(uuid)
+	data.Transcripts[idA].End = data.Transcripts[idB].End
+	data.Transcripts[idA].Text += " " + data.Transcripts[idB].Text
+	data.Transcripts[idA].Words = append(data.Transcripts[idA].Words, data.Transcripts[idB].Words...)
+	data.Transcripts = append(data.Transcripts[:idB], data.Transcripts[idB+1:]...)
+	for i, _ := range data.Transcripts {
+		data.Transcripts[i].ID = i
+	}
+	data.WriteJSON()
+	return c.Redirect(c.Request.Referer())
+}
+
+func fetchJSON(uuid string) (data appJobs.ProcessFiles) {
+	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uuid))
+	err := json.Unmarshal(plan, &data)
+	if err != nil {
+		revel.AppLog.Error("Unable to open JSON")
+	}
+	return
+}
+
 func (c *App) ExportSRT(uuid string) revel.Result {
 	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uuid))
 	var data appJobs.ProcessFiles

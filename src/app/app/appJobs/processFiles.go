@@ -24,6 +24,17 @@ type ProcessFiles struct {
 	Transcripts      Transcript
 }
 
+type Transcript []struct {
+	ID    int
+	Start float64 `json:"start"`
+	End   float64 `json:"end"`
+	Text  string  `json:"text"`
+	Words []struct {
+		Text      string    `json:"text"`
+		Timestamp []float64 `json:"timestamp"`
+	} `json:"words"`
+}
+
 func (p ProcessFiles) Run() {
 	//revel.AppLog.Info(p.Filename)
 	mp3Filename := fmt.Sprintf("/data/recordings/%s.mp3", p.UUID)
@@ -164,17 +175,6 @@ func getStatus(uuid string) (bool, error) {
 	}
 	status := fmt.Sprintf("%+s", response["status"])
 	return status == "SUCCESS", nil
-}
-
-type Transcript []struct {
-	ID    int
-	Start float64 `json:"start"`
-	End   float64 `json:"end"`
-	Text  string  `json:"text"`
-	Words []struct {
-		Text      string    `json:"text"`
-		Timestamp []float64 `json:"timestamp"`
-	} `json:"words"`
 }
 
 func getVAD(uuid string) (Transcript, error) {

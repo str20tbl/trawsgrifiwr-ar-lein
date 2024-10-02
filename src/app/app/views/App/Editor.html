@@ -4,33 +4,52 @@
     <div class="row m-5">
         <div class="row">
             <div class="col-12">
-                <span class="fw-lighter float-end">{{.data.UUID}}</span>
                 <h3 class="cy">Cywiro</h3>
                 <h3 class="en">Correct</h3>
-            </div>
-            <div class="h4 fw-normal timeline-title mb-5 py-2">
+                <span class="fw-lighter">{{.data.UUID}}</span>
                 <span class="fw-lighter float-end">{{.data.OriginalFilename}}</span>
-                <button type="button" id="save" class="btn btn-outline-success">
-                    <i data-feather="save"></i>
-                    <span class="cy">Cadw</span><span class="en">Save</span>
-                </button>
-                <form action="/ExportSRT" method="get" class="float-end">
-                    <input type="hidden" name="uuid" value="{{.data.UUID}}">
-                    <button type="submit" id="export" class="btn btn-outline-primary">
+            </div>
+            <div class="col-6">
+                <div class="h4 fw-normal timeline-title mb-5 py-2">
+                    <button type="button" id="save" class="btn btn-sm btn-outline-success">
+                        <i data-feather="save"></i>
+                    </button>
+                    <button type="submit" id="export" class="btn btn-sm btn-outline-primary">
                         <i data-feather="download"></i>
                         SRT
                     </button>
-                </form>
+                    <form action="/ExportSRT" method="get" id="srt-form">
+                        <input type="hidden" name="uuid" value="{{.data.UUID}}">
+                    </form>
+                </div>
             </div>
             <div class="col-12" style="min-height: 400px;">
                 <div id="editor">
                     <audio style="width: 100%;" id="audiofile" src="/PlayAudio?uuid={{.data.UUID}}" controls></audio>
                     <br>
-
                     <div id="subtitles">
                         {{range .data.Transcripts}}
                         <div class="mb-3 row hide transcript" id="{{.ID}}_tran">
-                            <label for="staticEmail2" class="col-sm-12 ms-3">{{.Start}} - {{.End}}</label>
+                            <table class="table">
+                                <tr>
+                                    <td>ID: {{.ID}}</td>
+                                    <td>Start: {{.Start}}</td>
+                                    <td>End: {{.End}}</td>
+                                    {{if gt .ID 0}}
+                                    <td>
+                                        <form action="/MergeSegment" method="get">
+                                            <input type="hidden" name="uuid" value="{{$.data.UUID}}">
+                                            <input type="hidden" name="idA" value="{{add .ID -1}}">
+                                            <input type="hidden" name="idB" value="{{.ID}}">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                Mergio gyda
+                                                ID: {{add .ID -1}}
+                                            </button>
+                                        </form>
+                                    </td>
+                                    {{end}}
+                                </tr>
+                            </table>
                             <div class="col-sm-12">
                                 <textarea class="form-control" id="staticEmail2" rows="5">{{.Text}}</textarea>
                             </div>
@@ -64,6 +83,9 @@
                                     url: "/UpdateJSON",
                                     contentType: "application/json"
                                 });
+                            });
+                            $("#export").click(function () {
+                                $("#srt-form").submit();
                             });
                             audioPlayer.addEventListener("timeupdate", function (e) {
                                 syncData.forEach(function (element, index, array) {
