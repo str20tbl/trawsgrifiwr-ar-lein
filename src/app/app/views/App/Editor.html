@@ -1,12 +1,26 @@
 {{set . "title" "Home"}}
 {{template "header.html" .}}
 <div class="container">
-    <div class="row m-5 py-7">
+    <div class="row m-5">
         <div class="row">
             <div class="col-12">
                 <span class="fw-lighter float-end">{{.data.UUID}}</span>
                 <h3 class="cy">Cywiro</h3>
                 <h3 class="en">Correct</h3>
+            </div>
+            <div class="h4 fw-normal timeline-title mb-5 py-2">
+                <span class="fw-lighter float-end">{{.data.OriginalFilename}}</span>
+                <button type="button" id="save" class="btn btn-outline-success">
+                    <i data-feather="save"></i>
+                    <span class="cy">Cadw</span><span class="en">Save</span>
+                </button>
+                <form action="/ExportSRT" method="get" class="float-end">
+                    <input type="hidden" name="uuid" value="{{.data.UUID}}">
+                    <button type="submit" id="export" class="btn btn-outline-primary">
+                        <i data-feather="download"></i>
+                        SRT
+                    </button>
+                </form>
             </div>
             <div class="col-12" style="min-height: 400px;">
                 <div id="editor">
@@ -14,34 +28,74 @@
                     <br>
 
                     <div id="subtitles">
-                        {{range $i, $el := .data.Transcripts}}
-                        <div class="mb-3 row hide transcript" id="{{$i}}_tran">
-                            <label for="staticEmail2" class="col-sm-2 col-form-label ms-3">{{$el.Start}} -
-                                {{$el.End}}</label>
-                            <div class="col-sm-9">
-                                <input type="text" readonly class="form-control" id="staticEmail2" value="{{$el.Text}}">
+                        {{range .data.Transcripts}}
+                        <div class="mb-3 row hide transcript" id="{{.ID}}_tran">
+                            <label for="staticEmail2" class="col-sm-12 ms-3">{{.Start}} - {{.End}}</label>
+                            <div class="col-sm-12">
+                                <textarea class="form-control" id="staticEmail2" rows="5">{{.Text}}</textarea>
                             </div>
                         </div>
                         {{end}}
                     </div>
                     <script>
+                        $(document).ready(function () {
+                            let this_div = $("#0_tran");
+                            this_div.show();
+                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-light").addClass("border-primary");
+                            let next_div = $("#1_tran");
+                            next_div.show();
+                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-light");
+                        });
                         (function (win, doc) {
                             var audioPlayer = doc.getElementById("audiofile");
                             var subtitles = doc.getElementById("subtitles");
                             var syncData = {{.data.Transcripts}};
-
+                            $("#save").click(function () {
+                                syncData.forEach(function (element, index, array) {
+                                    let this_div = $("#" + index + "_tran");
+                                    element.text = this_div.find("textarea").val();
+                                });
+                                $.ajax({
+                                    type: "POST",
+                                    data :JSON.stringify({
+                                        "uuid": "{{.data.UUID}}",
+                                        "data": syncData,
+                                    }),
+                                    url: "/UpdateJSON",
+                                    contentType: "application/json"
+                                });
+                            });
                             audioPlayer.addEventListener("timeupdate", function (e) {
                                 syncData.forEach(function (element, index, array) {
                                     if (audioPlayer.currentTime >= element.start && audioPlayer.currentTime <= element.end) {
                                         $(".transcript").hide();
                                         if (index > 0) {
-                                            $("#" + (index - 1) + "_tran").show();
+                                            let previous_div = $("#" + (index - 1) + "_tran");
+                                            previous_div.show();
+                                            previous_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-light");
                                         }
-                                        $("#" + index + "_tran").show();
+                                        let this_div = $("#" + index + "_tran");
+                                            this_div.show();
+                                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-light").addClass("border-primary");
                                         if (index < syncData.length) {
-                                            $("#" + (index + 1) + "_tran").show();
+                                            let next_div = $("#" + (index + 1) + "_tran");
+                                            next_div.show();
+                                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-light");
                                         }
                                     }
+                                });
+                                syncData.forEach(function (element, index, array) {
+                                    let this_div = $("#" + index + "_tran");
+                                    element.text = this_div.find("textarea").val();
+                                });
+                                $.ajax({
+                                    type: "POST",
+                                    data :JSON.stringify({
+                                        "uuid": "{{.data.UUID}}",
+                                        "data": syncData,
+                                    }),
+                                    url: "/UpdateJSON",
+                                    contentType: "application/json"
                                 });
                             });
                         }(window, document));

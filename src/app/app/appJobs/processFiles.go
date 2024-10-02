@@ -167,6 +167,7 @@ func getStatus(uuid string) (bool, error) {
 }
 
 type Transcript []struct {
+	ID    int
 	Start float64 `json:"start"`
 	End   float64 `json:"end"`
 	Text  string  `json:"text"`
@@ -199,7 +200,8 @@ func getVAD(uuid string) (Transcript, error) {
 	if err = json.Unmarshal(body, &response); err != nil {
 		return nil, err
 	}
-	//revel.AppLog.Infof("%+s", response)
-
+	for i, _ := range response {
+		response[i].ID = i
+	}
 	return response, nil
 }

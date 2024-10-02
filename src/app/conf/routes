@@ -7,12 +7,14 @@ module:testrunner
 module:jobs
 
 POST    /Upload                                 App.Upload
+POST    /UpdateJSON                             App.UpdateJSON
 
 GET     /                                       App.Index
 GET     /Docs                                   App.Docs
 GET     /Correct                                App.Correct
 GET     /PlayAudio                              App.PlayAudio
 GET     /Editor                                 App.Editor
+GET     /ExportSRT                              App.ExportSRT
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

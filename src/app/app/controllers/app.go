@@ -7,8 +7,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/revel/modules/jobs/app/jobs"
 	"github.com/revel/revel"
+	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type App struct {
@@ -21,6 +23,45 @@ func (c *App) Index() revel.Result {
 
 func (c *App) Docs() revel.Result {
 	return c.Render()
+}
+
+func (c *App) ExportSRT(uuid string) revel.Result {
+	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uuid))
+	var data appJobs.ProcessFiles
+	err := json.Unmarshal(plan, &data)
+	if err != nil {
+		revel.AppLog.Error("Unable to open JSON")
+	}
+	srtData := ""
+	for _, el := range data.Transcripts {
+		start := time.Unix(0, 0).UTC().Add(time.Duration(el.Start * float64(time.Second))).Format("T15:04:05.999Z")
+		end := time.Unix(0, 0).UTC().Add(time.Duration(el.End * float64(time.Second))).Format("T15:04:05.999Z")
+		srtData += fmt.Sprintf("%d\n%s --> %s\n%s\n\n", el.ID, start, end, el.Text)
+	}
+	srtFilename := fmt.Sprintf("/data/recordings/%s.srt", uuid)
+	if err := os.WriteFile(srtFilename, []byte(srtData), 0666); err != nil {
+		log.Fatal(err)
+	}
+	return c.RenderFileName(srtFilename, revel.Attachment)
+}
+
+func (c *App) UpdateJSON() revel.Result {
+	var jsonData struct {
+		UUID string             `json:"uuid"`
+		Data appJobs.Transcript `json:"data"`
+	}
+	c.Params.BindJSON(&jsonData)
+	revel.AppLog.Info(jsonData.UUID)
+	uid := fmt.Sprintf("%s", jsonData.UUID)
+	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uid))
+	var originalJSON appJobs.ProcessFiles
+	err := json.Unmarshal(plan, &originalJSON)
+	if err != nil {
+		revel.AppLog.Error("Unable to open JSON")
+	}
+	originalJSON.Transcripts = jsonData.Data
+	originalJSON.WriteJSON()
+	return c.RenderJSON(`{"success": "True"}`)
 }
 
 func (c *App) Editor(uuid string) revel.Result {
