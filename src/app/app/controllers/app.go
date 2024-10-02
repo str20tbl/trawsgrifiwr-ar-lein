@@ -123,8 +123,8 @@ func (c *App) Upload(file []byte) revel.Result {
 	c.Validation.Required(file)
 	c.Validation.MinSize(file, 2*KB).
 		Message(`Minimum file size 2KB`)
-	c.Validation.MaxSize(file, 200*MB).
-		Message(`Max file size 200MB`)
+	c.Validation.MaxSize(file, 746*MB).
+		Message(`Max file size 746MB`)
 
 	// Handle errors.
 	if c.Validation.HasErrors() {

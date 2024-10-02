@@ -20,7 +20,7 @@
                     </button>
                     <button type="submit" id="backup" class="btn btn-sm btn-outline-danger">
                         <i data-feather="refresh-cw"></i>
-                        <span class="cy">Agor</span><span class="en">open</span> Backup
+                        <span class="cy">Agor</span><span class="en">Open</span> Backup
                     </button>
                     <form action="/RevertJSON" method="get" id="backup-form">
                         <input type="hidden" name="uuid" value="{{.data.UUID}}">
@@ -44,7 +44,7 @@
                     <br>
                     <div id="subtitles">
                         {{range .data.Transcripts}}
-                        <div class="mb-3 row hide transcript" id="{{.ID}}_tran">
+                        <div class="card m-3 pt-3 row hide transcript" id="{{.ID}}_tran">
                             <table class="table">
                                 <tr>
                                     <td>ID: {{.ID}}</td>
@@ -65,7 +65,7 @@
                                     {{end}}
                                 </tr>
                             </table>
-                            <div class="col-sm-12">
+                            <div class="col-sm-12 pb-3">
                                 <textarea class="form-control" id="staticEmail2" rows="5">{{.Text}}</textarea>
                             </div>
                         </div>
@@ -75,10 +75,10 @@
                         $(document).ready(function () {
                             let this_div = $("#0_tran");
                             this_div.show();
-                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-light").addClass("border-primary");
+                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-success");
                             let next_div = $("#1_tran");
                             next_div.show();
-                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-light");
+                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-success").addClass("bg-dark-soft");
                         });
                         (function (win, doc) {
                             var audioPlayer = doc.getElementById("audiofile");
@@ -106,15 +106,15 @@
                                         if (index > 0) {
                                             let previous_div = $("#" + (index - 1) + "_tran");
                                             previous_div.show();
-                                            previous_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-light");
+                                            previous_div.find("textarea").attr('readonly','readonly').removeClass("border-success").addClass("bg-dark-soft");
                                         }
                                         let this_div = $("#" + index + "_tran");
                                             this_div.show();
-                                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-light").addClass("border-primary");
+                                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-success");
                                         if (index < syncData.length) {
                                             let next_div = $("#" + (index + 1) + "_tran");
                                             next_div.show();
-                                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-light");
+                                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-success").addClass("bg-dark-soft");
                                         }
                                     }
                                 });
