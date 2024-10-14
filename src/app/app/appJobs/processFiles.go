@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/revel/revel"
 	"io"
 	"mime/multipart"
@@ -22,6 +23,7 @@ type ProcessFiles struct {
 	Step             int
 	Status           bool
 	Transcripts      Transcript
+	TranscriptID     string
 }
 
 type Transcript []struct {
@@ -36,42 +38,56 @@ type Transcript []struct {
 }
 
 func (p ProcessFiles) Run() {
-	//revel.AppLog.Info(p.Filename)
+	revel.AppLog.Info(p.Filename)
 	mp3Filename := fmt.Sprintf("/data/recordings/%s.mp3", p.UUID)
 	p.Status = runCommand(fmt.Sprintf("ffmpeg -i %s -vn -ar 44100 -ac 1 -b:a 192k %s", p.Filename, mp3Filename))
 	p.Step += 1
 	p.WriteJSON()
 	if !p.Status {
 		revel.AppLog.Error("Failed to convert file")
-	} else {
-		resp, err := transcribe(mp3Filename)
-		if err != nil {
-			revel.AppLog.Error("Failed to transcribe file", err)
-		}
-		//revel.AppLog.Infof("%+s", resp["id"])
-		transcriptID := fmt.Sprintf("%s", resp["id"])
-		for {
-			time.Sleep(30 * time.Second)
-			gotTranscript, err := getStatus(transcriptID)
-			//revel.AppLog.Infof("Checking transcript %s ready: %t", transcriptID, gotTranscript)
-			if err != nil {
-				revel.AppLog.Error("Failed to transcribe file", err)
-			}
-			if gotTranscript {
-				break
-			}
-		}
-		p.Transcripts, err = getVAD(transcriptID)
-		if err != nil {
-			revel.AppLog.Error("Failed to transcribe file", err)
-		}
-		p.Step += 1
-		p.WriteJSON()
-		time.Sleep(5 * time.Second)
-		p.Step += 1
-		p.WriteJSON()
-		p.SaveBackup()
+		return
 	}
+	resp, err := transcribe(mp3Filename)
+	if err != nil {
+		revel.AppLog.Error("Failed to convert file")
+		p.Status = false
+		return
+	}
+	var tID interface{}
+	if tID, p.Status = resp["id"]; !p.Status {
+		revel.AppLog.Error("Failed to convert file")
+		return
+	}
+	p.TranscriptID = fmt.Sprintf("%s", tID)
+	_, err = uuid.Parse(p.TranscriptID)
+	if err != nil {
+		revel.AppLog.Error("Failed to convert file")
+		p.Status = false
+		return
+	}
+	for {
+		time.Sleep(30 * time.Second)
+		gotTranscript, err := getStatus(p.TranscriptID)
+		revel.AppLog.Infof("Checking transcript %s ready: %t", p.TranscriptID, gotTranscript)
+		if err != nil {
+			revel.AppLog.Error("Failed to transcribe file", err)
+		}
+		if gotTranscript {
+			break
+		}
+	}
+	p.Transcripts, err = getVAD(p.TranscriptID)
+	if err != nil {
+		revel.AppLog.Error("Failed to transcribe file", err)
+		p.Status = false
+		return
+	}
+	p.Step += 1
+	p.WriteJSON()
+	time.Sleep(5 * time.Second)
+	p.Step += 1
+	p.WriteJSON()
+	p.SaveBackup()
 }
 
 func (p ProcessFiles) SaveBackup() {
@@ -125,7 +141,7 @@ func runCommand(cmd string) bool {
 		revel.AppLog.Error(string(cmdOut), err)
 		return false
 	}
-	//revel.AppLog.Info(string(cmdOut))
+	revel.AppLog.Info(string(cmdOut))
 	return true
 }
 
@@ -147,7 +163,7 @@ func transcribe(filename string) (map[string]interface{}, error) {
 	}
 	writer.Close()
 
-	req, err := http.NewRequest("POST", "https://api-dev.techiaith.cymru/speech-to-text/v1/transcribe_long_form/?api_key=11111", &b)
+	req, err := http.NewRequest("POST", "https://api-dev.techiaith.cymru/speech-to-text/v1/transcribe_long_form/?api_key=11111&model=whisper-formal", &b)
 	if err != nil {
 		return nil, err
 	}
