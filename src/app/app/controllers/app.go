@@ -82,12 +82,15 @@ func (c *App) UpdateJSON() revel.Result {
 		UUID string             `json:"uuid"`
 		Data appJobs.Transcript `json:"data"`
 	}
-	c.Params.BindJSON(&jsonData)
+	err := c.Params.BindJSON(&jsonData)
+	if err != nil {
+		revel.AppLog.Error("Unable to bind JSON", err)
+	}
 	revel.AppLog.Info(jsonData.UUID)
 	uid := fmt.Sprintf("%s", jsonData.UUID)
 	plan, _ := os.ReadFile(fmt.Sprintf("/data/recordings/%s.json", uid))
 	var originalJSON appJobs.ProcessFiles
-	err := json.Unmarshal(plan, &originalJSON)
+	err = json.Unmarshal(plan, &originalJSON)
 	if err != nil {
 		revel.AppLog.Error("Unable to open JSON")
 	}

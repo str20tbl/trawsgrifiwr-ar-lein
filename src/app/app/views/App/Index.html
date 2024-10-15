@@ -92,7 +92,7 @@
                             window.location.assign(e.target.responseURL);
                         };
                         var fd = new FormData();
-                        var filename = new Date().toISOString();
+                        var filename = new Date().toISOString()+".wav";
                         fd.append("file", blob, filename);
                         xhr.open("POST", "/Upload", true);
                         xhr.send(fd);
