@@ -35,7 +35,7 @@
         <div class="d-flex mb-4">
             <i class="badge bg-white border-{{if gt .data.Step 2}}{{if eq .data.Status false}}danger{{else}}success{{end}}{{else}}dark{{end}} rounded-circle mt-2"></i>
             <div style="width:10px" class=" mx-1 flex-none"></div>
-            <div class="flex-grow-1 lead {{if gt .data.Step 2}}bg-success-soft{{else}}bg-light{{end}} rounded p-3 position-relative transition-hover-end transition-all-ease-250">
+            <div class="flex-grow-1 lead {{if gt .data.Step 2}}bg-{{if .data.Status}}success{{else}}danger{{end}}-soft{{else}}bg-light{{end}} rounded p-3 position-relative transition-hover-end transition-all-ease-250">
                 <i class="fi fi-{{if lt .data.Step 3}}{{if eq .data.Step 2}}loading-dots{{else}}dots-horizontal{{end}}{{else}}{{if eq .data.Status false}}close{{else}}check{{end}}{{end}} {{if .data.Status}}{{if lt .data.Step 3}}{{if eq .data.Step 2}}fi-spin{{end}}{{end}}{{end}}"></i>
                 <span class="cy">Trawsgrifio ffeil.</span>
                 <span class="en">transcribing file.</span>
