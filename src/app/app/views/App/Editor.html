@@ -66,7 +66,7 @@
                                 </tr>
                             </table>
                             <div class="col-sm-12 pb-3">
-                                <textarea class="form-control" id="staticEmail2" rows="5">{{.Text}}</textarea>
+                                <textarea class="form-control" id="staticEmail2" rows="5" onfocusout="saveFile()">{{.Text}}</textarea>
                             </div>
                         </div>
                         {{end}}
@@ -75,11 +75,27 @@
                         $(document).ready(function () {
                             let this_div = $("#0_tran");
                             this_div.show();
-                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-success");
+                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-info");
                             let next_div = $("#1_tran");
                             next_div.show();
-                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-success").addClass("bg-dark-soft");
+                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-info").addClass("bg-dark-soft");
                         });
+                        function saveFile() {
+                            var syncData = {{.data.Transcripts}};
+                            syncData.forEach(function (element, index, array) {
+                                let this_div = $("#" + index + "_tran");
+                                element.text = this_div.find("textarea").val();
+                            });
+                            $.ajax({
+                                    type: "POST",
+                                    data :JSON.stringify({
+                                        "uuid": "{{.data.UUID}}",
+                                        "data": syncData,
+                                    }),
+                                    url: "/UpdateJSON",
+                                    contentType: "application/json"
+                                });
+                        }
                         (function (win, doc) {
                             var audioPlayer = doc.getElementById("audiofile");
                             var subtitles = doc.getElementById("subtitles");
@@ -106,30 +122,21 @@
                                         if (index > 0) {
                                             let previous_div = $("#" + (index - 1) + "_tran");
                                             previous_div.show();
-                                            previous_div.find("textarea").attr('readonly','readonly').removeClass("border-success").addClass("bg-dark-soft");
+                                            previous_div.find("textarea").attr('readonly','readonly').removeClass("border-info").addClass("bg-dark-soft");
                                         }
                                         let this_div = $("#" + index + "_tran");
                                             this_div.show();
-                                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-success");
+                                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-info");
                                         if (index < syncData.length) {
                                             let next_div = $("#" + (index + 1) + "_tran");
                                             next_div.show();
-                                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-success").addClass("bg-dark-soft");
+                                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-info").addClass("bg-dark-soft");
                                         }
                                     }
                                 });
                                 syncData.forEach(function (element, index, array) {
                                     let this_div = $("#" + index + "_tran");
                                     element.text = this_div.find("textarea").val();
-                                });
-                                $.ajax({
-                                    type: "POST",
-                                    data :JSON.stringify({
-                                        "uuid": "{{.data.UUID}}",
-                                        "data": syncData,
-                                    }),
-                                    url: "/UpdateJSON",
-                                    contentType: "application/json"
                                 });
                             });
                         }(window, document));
