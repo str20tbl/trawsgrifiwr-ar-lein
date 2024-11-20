@@ -95,6 +95,10 @@ func (c *App) UpdateJSON() revel.Result {
 		revel.AppLog.Error("Unable to open JSON")
 	}
 	originalJSON.Transcripts = jsonData.Data
+	originalJSON.Updated = time.Now()
+	if originalJSON.Started.IsZero() {
+		originalJSON.Started = time.Now()
+	}
 	originalJSON.WriteJSON()
 	return c.RenderJSON(`{"success": "True"}`)
 }

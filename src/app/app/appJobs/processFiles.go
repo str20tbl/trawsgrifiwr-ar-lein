@@ -22,6 +22,8 @@ type ProcessFiles struct {
 	Size             float64
 	Step             int
 	Status           bool
+	Started          time.Time
+	Updated          time.Time
 	Transcripts      Transcript
 	TranscriptID     string
 }
@@ -125,6 +127,7 @@ func (p ProcessFiles) WriteJSON() {
 		}
 	}()
 	asJSON, err := json.MarshalIndent(p, "", "\t")
+	revel.AppLog.Error("%s", string(asJSON))
 	if err != nil {
 		revel.AppLog.Error("Unable to marshal JSON", err)
 	}
