@@ -8,6 +8,7 @@ module:jobs
 
 POST    /Upload                                 App.Upload
 POST    /UpdateJSON                             App.UpdateJSON
+POST    /MergeSegment                           App.MergeSegment
 
 GET     /                                       App.Index
 GET     /Docs                                   App.Docs
@@ -15,7 +16,6 @@ GET     /Correct                                App.Correct
 GET     /PlayAudio                              App.PlayAudio
 GET     /Editor                                 App.Editor
 GET     /ExportSRT                              App.ExportSRT
-GET     /MergeSegment                           App.MergeSegment
 GET     /RevertJSON                             App.RevertJSON
 
 # Ignore favicon requests

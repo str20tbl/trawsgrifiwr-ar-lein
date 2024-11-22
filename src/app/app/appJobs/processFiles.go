@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -28,21 +29,56 @@ type ProcessFiles struct {
 	TranscriptID     string
 }
 
-type Transcript []struct {
-	ID    int
-	Start float64 `json:"start"`
-	End   float64 `json:"end"`
-	Text  string  `json:"text"`
-	Words []struct {
-		Text      string    `json:"text"`
-		Timestamp []float64 `json:"timestamp"`
-	} `json:"words"`
+type TranscriptA struct {
+	Segments []struct {
+		Start float64 `json:"start"`
+		End   float64 `json:"end"`
+		Text  string  `json:"text"`
+		Words []struct {
+			Word  string  `json:"word"`
+			Start float64 `json:"start"`
+			End   float64 `json:"end"`
+			Score float64 `json:"score"`
+		} `json:"words"`
+		Chars []struct {
+			Char  string  `json:"char"`
+			Start float64 `json:"start,omitempty"`
+			End   float64 `json:"end,omitempty"`
+			Score float64 `json:"score,omitempty"`
+		} `json:"chars"`
+	} `json:"segments"`
+}
+
+type Transcript struct {
+	ID       string `json:"id"`
+	Version  int    `json:"version"`
+	Success  bool   `json:"success"`
+	Segments []struct {
+		ID    int     `json:"id"`
+		Start float64 `json:"start"`
+		End   float64 `json:"end"`
+		Text  string  `json:"text"`
+		Words []struct {
+			Word  string  `json:"word"`
+			Start float64 `json:"start"`
+			End   float64 `json:"end"`
+			Score float64 `json:"score"`
+		} `json:"words"`
+		Chars []struct {
+			Char  string  `json:"char"`
+			Start float64 `json:"start,omitempty"`
+			End   float64 `json:"end,omitempty"`
+			Score float64 `json:"score,omitempty"`
+		} `json:"chars"`
+	} `json:"segments"`
 }
 
 func (p ProcessFiles) Run() {
 	revel.AppLog.Info(p.Filename)
 	mp3Filename := fmt.Sprintf("/data/recordings/%s.mp3", p.UUID)
-	p.Status = runCommand(fmt.Sprintf("ffmpeg -i %s -vn -ar 44100 -ac 1 -b:a 192k %s", p.Filename, mp3Filename))
+	if !strings.HasSuffix(p.Filename, ".mp3") {
+		p.Status = runCommand(fmt.Sprintf("ffmpeg -i %s %s", p.Filename, mp3Filename))
+	}
 	p.Step += 1
 	p.WriteJSON()
 	if !p.Status {
@@ -70,9 +106,8 @@ func (p ProcessFiles) Run() {
 	for {
 		time.Sleep(30 * time.Second)
 		gotTranscript, err := getStatus(p.TranscriptID)
-		revel.AppLog.Infof("Checking transcript %s ready: %t", p.TranscriptID, gotTranscript)
 		if err != nil {
-			revel.AppLog.Error("Failed to transcribe file", err)
+			revel.AppLog.Errorf("Failed to transcribe file %+v", err)
 		}
 		if gotTranscript {
 			break
@@ -114,6 +149,14 @@ func (p ProcessFiles) SaveBackup() {
 	}
 }
 
+func (p ProcessFiles) AsJSON() string {
+	asJSON, err := json.MarshalIndent(p, "", "\t")
+	if err != nil {
+		revel.AppLog.Error("Unable to marshal JSON", err)
+	}
+	return string(asJSON)
+}
+
 func (p ProcessFiles) WriteJSON() {
 	filepath := fmt.Sprintf("/data/recordings/%s.json", p.UUID)
 	f, err := os.Create(filepath)
@@ -127,7 +170,6 @@ func (p ProcessFiles) WriteJSON() {
 		}
 	}()
 	asJSON, err := json.MarshalIndent(p, "", "\t")
-	revel.AppLog.Error("%s", string(asJSON))
 	if err != nil {
 		revel.AppLog.Error("Unable to marshal JSON", err)
 	}
@@ -166,7 +208,7 @@ func transcribe(filename string) (map[string]interface{}, error) {
 	}
 	writer.Close()
 
-	req, err := http.NewRequest("POST", "https://api-dev.techiaith.cymru/speech-to-text/v1/transcribe_long_form/?api_key=11111&model=whisper-formal", &b)
+	req, err := http.NewRequest("POST", "https://api-dev.techiaith.cymru/speech-to-text/v2/transcribe_long_form/?api_key=11111", &b)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +235,7 @@ func transcribe(filename string) (map[string]interface{}, error) {
 }
 
 func getStatus(uuid string) (bool, error) {
-	requestString := fmt.Sprintf("https://api-dev.techiaith.cymru/speech-to-text/v1/get_status/?stt_id=%s&api_key=11111", uuid)
+	requestString := fmt.Sprintf("https://api-dev.techiaith.cymru/speech-to-text/v2/get_status/?stt_id=%s&api_key=11111", uuid)
 	req, err := http.NewRequest("GET", requestString, nil)
 	if err != nil {
 		return false, err
@@ -219,31 +261,30 @@ func getStatus(uuid string) (bool, error) {
 	return status == "SUCCESS", nil
 }
 
-func getVAD(uuid string) (Transcript, error) {
-	requestString := fmt.Sprintf("https://api-dev.techiaith.cymru/speech-to-text/v1/get_vad_json/?stt_id=%s&api_key=11111", uuid)
+func getVAD(uuid string) (t Transcript, err error) {
+	requestString := fmt.Sprintf("https://api-dev.techiaith.cymru/speech-to-text/v2/get_json/?stt_id=%s&api_key=11111", uuid)
 	req, err := http.NewRequest("GET", requestString, nil)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	var response Transcript
-	if err = json.Unmarshal(body, &response); err != nil {
-		return nil, err
+	if err = json.Unmarshal(body, &t); err != nil {
+		return
 	}
-	for i, _ := range response {
-		response[i].ID = i
+	for i, _ := range t.Segments {
+		t.Segments[i].ID = i
 	}
-	return response, nil
+	return
 }

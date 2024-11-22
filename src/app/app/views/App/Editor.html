@@ -43,26 +43,35 @@
                     <audio style="width: 100%;" id="audiofile" src="/PlayAudio?uuid={{.data.UUID}}" controls></audio>
                     <br>
                     <div id="subtitles">
-                        {{range .data.Transcripts}}
+                        {{range .data.Transcripts.Segments}}
                         <div class="card m-3 pt-3 row hide transcript" id="{{.ID}}_tran">
                             <table class="table">
                                 <tr>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="restart_segment({{addTime .Start -0.25}})">
+                                            <svg width="18px" height="18px" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
+                                              <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"></path>
+                                            </svg>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary" id="repeat-{{.ID}}" onclick="loop_segment('repeat-{{.ID}}', {{addTime .Start -0.25}}, {{addTime .End 0.25}})">
+                                            <svg width="18px" height="18px" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-recycle" viewBox="0 0 16 16">
+                                              <path d="M9.302 1.256a1.5 1.5 0 0 0-2.604 0l-1.704 2.98a.5.5 0 0 0 .869.497l1.703-2.981a.5.5 0 0 1 .868 0l2.54 4.444-1.256-.337a.5.5 0 1 0-.26.966l2.415.647a.5.5 0 0 0 .613-.353l.647-2.415a.5.5 0 1 0-.966-.259l-.333 1.242-2.532-4.431zM2.973 7.773l-1.255.337a.5.5 0 1 1-.26-.966l2.416-.647a.5.5 0 0 1 .612.353l.647 2.415a.5.5 0 0 1-.966.259l-.333-1.242-2.545 4.454a.5.5 0 0 0 .434.748H5a.5.5 0 0 1 0 1H1.723A1.5 1.5 0 0 1 .421 12.24l2.552-4.467zm10.89 1.463a.5.5 0 1 0-.868.496l1.716 3.004a.5.5 0 0 1-.434.748h-5.57l.647-.646a.5.5 0 1 0-.708-.707l-1.5 1.5a.498.498 0 0 0 0 .707l1.5 1.5a.5.5 0 1 0 .708-.707l-.647-.647h5.57a1.5 1.5 0 0 0 1.302-2.244l-1.716-3.004z"></path>
+                                            </svg>
+                                        </button>
+                                    </td>
                                     <td>ID: {{.ID}}</td>
                                     <td>Start: {{.Start}}</td>
                                     <td>End: {{.End}}</td>
-                                    {{if gt .ID 0}}
                                     <td>
-                                        <form action="/MergeSegment" method="get">
-                                            <input type="hidden" name="uuid" value="{{$.data.UUID}}">
-                                            <input type="hidden" name="idA" value="{{add .ID -1}}">
-                                            <input type="hidden" name="idB" value="{{.ID}}">
-                                            <button type="submit" class="btn btn-sm btn-outline-primary">
-                                                Mergio gyda
-                                                ID: {{add .ID -1}}
-                                            </button>
-                                        </form>
+                                        {{if gt .ID 0}}
+                                        <button class="btn btn-sm btn-outline-primary" onclick="mergeSegments({{add .ID -1}}, {{.ID}})">
+                                            Cyfuno gyda
+                                            ID: {{add .ID -1}}
+                                        </button>
+                                        {{else}}
+                                        &nbsp
+                                        {{end}}
                                     </td>
-                                    {{end}}
                                 </tr>
                             </table>
                             <div class="col-sm-12 pb-3">
@@ -80,8 +89,39 @@
                             next_div.show();
                             next_div.find("textarea").attr('readonly','readonly').removeClass("border-info").addClass("bg-dark-soft");
                         });
+                        function restart_segment(startTime) {
+                            let audioPlayer = document.getElementById("audiofile");
+                            audioPlayer.currentTime = startTime;
+                            audioPlayer.play();
+                        }
+                        let tStart = 0.0;
+                        let tEnd = 0.0;
+                        let checkTime = function () {
+                            let audioPlayer = document.getElementById("audiofile");
+                            if (audioPlayer.currentTime > tEnd) {
+                                audioPlayer.currentTime = tStart;
+                            }
+                        }
+                        function loop_segment(divID, startTime, endTime) {
+                            tStart = startTime;
+                            tEnd = endTime;
+                            console.log(divID, startTime, endTime);
+                            let looping = $("#"+divID).hasClass("btn-primary");
+                            looping = !looping;
+                            console.log(looping);
+                            let audioPlayer = document.getElementById("audiofile");
+                            if (looping) {
+                                audioPlayer.addEventListener("timeupdate", checkTime);
+                                audioPlayer.currentTime = startTime;
+                                audioPlayer.play();
+                                $("#"+divID).removeClass("btn-outline-primary").addClass("btn-primary");
+                            } else {
+                                audioPlayer.removeEventListener("timeupdate", checkTime);
+                                $("#"+divID).removeClass("btn-primary").addClass("btn-outline-primary");
+                            }
+                        }
                         function saveFile() {
-                            var syncData = {{.data.Transcripts}};
+                            let syncData = {{.data.Transcripts.Segments}};
                             syncData.forEach(function (element, index, array) {
                                 let this_div = $("#" + index + "_tran");
                                 element.text = this_div.find("textarea").val();
@@ -96,10 +136,53 @@
                                     contentType: "application/json"
                                 });
                         }
+                        function mergeSegments(idA, idB) {
+                            let data = {
+                                "uuid": "{{.data.UUID}}",
+                                "idA": idA,
+                                "idB": idB,
+                            }
+                            console.log(data);
+                            $.ajax({
+                                type: "POST",
+                                data :JSON.stringify(data),
+                                url: "/MergeSegment",
+                                contentType: "application/json",
+                                success: function(data) {
+                                    $("#subtitles").html(data);
+                                    var audioPlayer = document.getElementById("audiofile");
+                                    var syncData = {{.data.Transcripts.Segments}};
+                                    syncData.forEach(function (element, index, array) {
+                                        let start = element.start;
+                                        if (index === 0) {
+                                            if (audioPlayer.currentTime === 0) {
+                                                start = 0
+                                            }
+                                        }
+                                        if (audioPlayer.currentTime >= start && audioPlayer.currentTime <= element.end) {
+                                            $(".transcript").hide();
+                                            if (index > 0) {
+                                                let previous_div = $("#" + (index - 1) + "_tran");
+                                                previous_div.show();
+                                                previous_div.find("textarea").attr('readonly','readonly').removeClass("border-info").addClass("bg-dark-soft");
+                                            }
+                                            let this_div = $("#" + index + "_tran");
+                                                this_div.show();
+                                                this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-info");
+                                            if (index < syncData.length) {
+                                                let next_div = $("#" + (index + 1) + "_tran");
+                                                next_div.show();
+                                                next_div.find("textarea").attr('readonly','readonly').removeClass("border-info").addClass("bg-dark-soft");
+                                            }
+                                        }
+                                    });
+                                },
+                            });
+                        }
                         (function (win, doc) {
                             var audioPlayer = doc.getElementById("audiofile");
                             var subtitles = doc.getElementById("subtitles");
-                            var syncData = {{.data.Transcripts}};
+                            var syncData = {{.data.Transcripts.Segments}};
                             $("#save").click(function () {
                                 syncData.forEach(function (element, index, array) {
                                     let this_div = $("#" + index + "_tran");
