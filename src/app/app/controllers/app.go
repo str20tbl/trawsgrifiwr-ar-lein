@@ -2,11 +2,13 @@ package controllers
 
 import (
 	"app/app/appJobs"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/revel/modules/jobs/app/jobs"
 	"github.com/revel/revel"
+	"html/template"
 	"log"
 	"os"
 	"path/filepath"
@@ -31,17 +33,63 @@ func (c *App) RevertJSON(uuid string) revel.Result {
 	return c.Redirect(c.Request.Referer())
 }
 
-func (c *App) MergeSegment(uuid string, idA, idB int) revel.Result {
-	data := fetchJSON(uuid)
-	data.Transcripts[idA].End = data.Transcripts[idB].End
-	data.Transcripts[idA].Text += " " + data.Transcripts[idB].Text
-	data.Transcripts[idA].Words = append(data.Transcripts[idA].Words, data.Transcripts[idB].Words...)
-	data.Transcripts = append(data.Transcripts[:idB], data.Transcripts[idB+1:]...)
-	for i, _ := range data.Transcripts {
-		data.Transcripts[i].ID = i
+func (c *App) MergeSegment() revel.Result {
+	var jsonData struct {
+		UUID string `json:"uuid"`
+		IDa  int    `json:"idA"`
+		IDb  int    `json:"idB"`
+	}
+	err := c.Params.BindJSON(&jsonData)
+	if err != nil {
+		revel.AppLog.Error("Unable to bind JSON", err)
+	}
+	revel.AppLog.Infof("%+v", jsonData)
+	data := fetchJSON(jsonData.UUID)
+	data.Transcripts.Segments[jsonData.IDa].End = data.Transcripts.Segments[jsonData.IDb].End
+	data.Transcripts.Segments[jsonData.IDa].Text += " " + data.Transcripts.Segments[jsonData.IDb].Text
+	data.Transcripts.Segments[jsonData.IDa].Words = append(data.Transcripts.Segments[jsonData.IDa].Words, data.Transcripts.Segments[jsonData.IDb].Words...)
+	data.Transcripts.Segments = append(data.Transcripts.Segments[:jsonData.IDb], data.Transcripts.Segments[jsonData.IDb+1:]...)
+	for i, _ := range data.Transcripts.Segments {
+		data.Transcripts.Segments[i].ID = i
 	}
 	data.WriteJSON()
-	return c.Redirect(c.Request.Referer())
+	page := `{{range .data.Transcripts.Segments}}<div class="card m-3 pt-3 row hide transcript" id="{{.ID}}_tran">
+	<table class="table">
+		<tr>
+			<td>ID: {{.ID}}</td>
+			<td>Start: {{.Start}}</td>
+			<td>End: {{.End}}</td>
+			{{if gt .ID 0}}
+			<td>
+				<button class="btn btn-sm btn-outline-primary" onclick="mergeSegments({{add .ID -1}}, {{.ID}})">
+					Cyfuno gyda
+					ID: {{add .ID -1}}
+				</button>
+			</td>
+			{{end}}
+		</tr>
+	</table>
+	<div class="col-sm-12 pb-3">
+		<textarea class="form-control" id="staticEmail2" rows="5" onfocusout="saveFile()">{{.Text}}</textarea>
+	</div>
+</div>
+{{end}}`
+	tmpl, err := template.New("page").Funcs(template.FuncMap{
+		"add": func(a, b int) string {
+			return fmt.Sprintf("%d", a+b)
+		},
+	}).Parse(page)
+	if err != nil {
+		revel.AppLog.Error("Parse", err)
+	}
+	var output bytes.Buffer
+	err = tmpl.Execute(&output, map[string]interface{}{
+		"data": data,
+	})
+	if err != nil {
+		revel.AppLog.Error("Execute", err)
+	}
+	return c.RenderJSON(output.String())
 }
 
 func fetchBackup(uuid string) (data appJobs.ProcessFiles) {
@@ -65,7 +113,7 @@ func fetchJSON(uuid string) (data appJobs.ProcessFiles) {
 func (c *App) ExportSRT(uuid string) revel.Result {
 	data := fetchJSON(uuid)
 	srtData := ""
-	for _, el := range data.Transcripts {
+	for _, el := range data.Transcripts.Segments {
 		start := time.Unix(0, 0).UTC().Add(time.Duration(el.Start * float64(time.Second))).Format("T15:04:05.999Z")
 		end := time.Unix(0, 0).UTC().Add(time.Duration(el.End * float64(time.Second))).Format("T15:04:05.999Z")
 		srtData += fmt.Sprintf("%d\n%s --> %s\n%s\n\n", el.ID, start, end, el.Text)

@@ -8,7 +8,7 @@ services:
     build: "./src"
     restart: always
     container_name: trawsgrifiwr.techiaith.cymru
-    command: ["revel", "run", "-a", ".", "prod"]
+    command: ["revel", "run", "-a", ".", "dev"]
     volumes:
       - "./src/app:/usr/src/app"
       - "./data/recordings:/data/recordings"
