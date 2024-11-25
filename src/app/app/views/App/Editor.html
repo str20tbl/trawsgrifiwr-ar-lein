@@ -9,7 +9,7 @@
                 <span class="fw-lighter">{{.data.UUID}}</span>
                 <span class="fw-lighter float-end">{{.data.OriginalFilename}}</span>
             </div>
-            <div class="col-6">
+            <div class="col-12">
                 <div class="h4 fw-normal timeline-title mb-5 py-2">
                     <button type="button" id="save" class="btn btn-sm btn-outline-success">
                         <i data-feather="save"></i>
@@ -18,14 +18,21 @@
                         <i data-feather="download"></i>
                         SRT
                     </button>
-                    <button type="submit" id="backup" class="btn btn-sm btn-outline-danger">
+                    <button type="submit" id="backup" class="btn btn-sm btn-outline-warning">
                         <i data-feather="refresh-cw"></i>
                         <span class="cy">Agor</span><span class="en">Open</span> Backup
+                    </button>
+                    <button type="submit" id="delete" class="btn btn-sm btn-outline-danger float-end">
+                        <i data-feather="trash-2"></i>
+                        <span class="cy">Dileu</span><span class="en">Delete</span>
                     </button>
                     <form action="/RevertJSON" method="get" id="backup-form">
                         <input type="hidden" name="uuid" value="{{.data.UUID}}">
                     </form>
                     <form action="/ExportSRT" method="get" id="srt-form">
+                        <input type="hidden" name="uuid" value="{{.data.UUID}}">
+                    </form>
+                    <form action="/DeleteRecord" method="post" id="delete-form">
                         <input type="hidden" name="uuid" value="{{.data.UUID}}">
                     </form>
                     <script>
@@ -34,6 +41,9 @@
                         });
                         $("#backup").click(function () {
                             $("#backup-form").submit();
+                        });
+                        $("#delete").click(function () {
+                            $("#delete-form").submit();
                         });
                     </script>
                 </div>
@@ -60,8 +70,8 @@
                                         </button>
                                     </td>
                                     <td>ID: {{.ID}}</td>
-                                    <td>Start: {{.Start}}</td>
-                                    <td>End: {{.End}}</td>
+                                    <td>Start: {{s2m .Start}}</td>
+                                    <td>End: {{s2m .End}}</td>
                                     <td>
                                         {{if gt .ID 0}}
                                         <button class="btn btn-sm btn-outline-primary" onclick="mergeSegments({{add .ID -1}}, {{.ID}})">
@@ -84,10 +94,10 @@
                         $(document).ready(function () {
                             let this_div = $("#0_tran");
                             this_div.show();
-                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-info");
+                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-primary");
                             let next_div = $("#1_tran");
                             next_div.show();
-                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-info").addClass("bg-dark-soft");
+                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-dark-soft");
                         });
                         function restart_segment(startTime) {
                             let audioPlayer = document.getElementById("audiofile");
@@ -164,15 +174,15 @@
                                             if (index > 0) {
                                                 let previous_div = $("#" + (index - 1) + "_tran");
                                                 previous_div.show();
-                                                previous_div.find("textarea").attr('readonly','readonly').removeClass("border-info").addClass("bg-dark-soft");
+                                                previous_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-dark-soft");
                                             }
                                             let this_div = $("#" + index + "_tran");
                                                 this_div.show();
-                                                this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-info");
+                                                this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-primary");
                                             if (index < syncData.length) {
                                                 let next_div = $("#" + (index + 1) + "_tran");
                                                 next_div.show();
-                                                next_div.find("textarea").attr('readonly','readonly').removeClass("border-info").addClass("bg-dark-soft");
+                                                next_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-dark-soft");
                                             }
                                         }
                                     });
@@ -205,15 +215,15 @@
                                         if (index > 0) {
                                             let previous_div = $("#" + (index - 1) + "_tran");
                                             previous_div.show();
-                                            previous_div.find("textarea").attr('readonly','readonly').removeClass("border-info").addClass("bg-dark-soft");
+                                            previous_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-dark-soft");
                                         }
                                         let this_div = $("#" + index + "_tran");
                                             this_div.show();
-                                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-info");
+                                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-primary");
                                         if (index < syncData.length) {
                                             let next_div = $("#" + (index + 1) + "_tran");
                                             next_div.show();
-                                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-info").addClass("bg-dark-soft");
+                                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-dark-soft");
                                         }
                                     }
                                 });
@@ -237,3 +247,6 @@
     </div>
 </div>
 {{template "footer.html" .}}
+
+
+

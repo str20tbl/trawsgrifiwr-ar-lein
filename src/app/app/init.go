@@ -4,6 +4,7 @@ import (
 	"fmt"
 	_ "github.com/revel/modules"
 	"github.com/revel/revel"
+	"time"
 )
 
 var (
@@ -41,6 +42,10 @@ func init() {
 
 	revel.TemplateFuncs["add"] = func(a, b int) int {
 		return a + b
+	}
+
+	revel.TemplateFuncs["s2m"] = func(inSeconds float64) string {
+		return time.Duration(inSeconds * float64(time.Second)).String()
 	}
 
 	revel.TemplateFuncs["addTime"] = func(a, b float64) float64 {

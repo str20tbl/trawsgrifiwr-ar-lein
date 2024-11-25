@@ -153,6 +153,9 @@ func (c *App) UpdateJSON() revel.Result {
 
 func (c *App) Editor(uuid string) revel.Result {
 	data := fetchJSON(uuid)
+	if data.UUID == "" {
+		return c.Redirect("/")
+	}
 	return c.Render(data)
 }
 
@@ -164,6 +167,27 @@ func (c *App) PlayAudio(uuid string) revel.Result {
 func (c *App) Correct(uuid string) revel.Result {
 	data := fetchJSON(uuid)
 	return c.Render(data)
+}
+
+func (c *App) DeleteRecord(uuid string) revel.Result {
+	base := "/data/recordings/%s.%s"
+	err := os.Remove(fmt.Sprintf(base, uuid, "json"))
+	if err != nil {
+		revel.AppLog.Error("Failed to DELETE", err)
+	}
+	err = os.Remove(fmt.Sprintf(base, uuid, "mp3"))
+	if err != nil {
+		revel.AppLog.Error("Failed to DELETE", err)
+	}
+	err = os.Remove(fmt.Sprintf(base, uuid, "wav"))
+	if err != nil {
+		revel.AppLog.Error("Failed to DELETE", err)
+	}
+	err = os.Remove(fmt.Sprintf(base, uuid, "backup.json"))
+	if err != nil {
+		revel.AppLog.Error("Failed to DELETE", err)
+	}
+	return c.Redirect("/")
 }
 
 const (
