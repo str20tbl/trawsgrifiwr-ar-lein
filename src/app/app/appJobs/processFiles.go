@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -23,61 +24,40 @@ type ProcessFiles struct {
 	Size             float64
 	Step             int
 	Status           bool
+	Duration         float64
 	Started          time.Time
 	Updated          time.Time
 	Transcripts      Transcript
 	TranscriptID     string
 }
 
-type TranscriptA struct {
-	Segments []struct {
-		Start float64 `json:"start"`
-		End   float64 `json:"end"`
-		Text  string  `json:"text"`
-		Words []struct {
-			Word  string  `json:"word"`
-			Start float64 `json:"start"`
-			End   float64 `json:"end"`
-			Score float64 `json:"score"`
-		} `json:"words"`
-		Chars []struct {
-			Char  string  `json:"char"`
-			Start float64 `json:"start,omitempty"`
-			End   float64 `json:"end,omitempty"`
-			Score float64 `json:"score,omitempty"`
-		} `json:"chars"`
-	} `json:"segments"`
+type Segment struct {
+	ID    int     `json:"id"`
+	Start float64 `json:"start"`
+	End   float64 `json:"end"`
+	Text  string  `json:"text"`
 }
 
 type Transcript struct {
-	ID       string `json:"id"`
-	Version  int    `json:"version"`
-	Success  bool   `json:"success"`
-	Segments []struct {
-		ID    int     `json:"id"`
-		Start float64 `json:"start"`
-		End   float64 `json:"end"`
-		Text  string  `json:"text"`
-		Words []struct {
-			Word  string  `json:"word"`
-			Start float64 `json:"start"`
-			End   float64 `json:"end"`
-			Score float64 `json:"score"`
-		} `json:"words"`
-		Chars []struct {
-			Char  string  `json:"char"`
-			Start float64 `json:"start,omitempty"`
-			End   float64 `json:"end,omitempty"`
-			Score float64 `json:"score,omitempty"`
-		} `json:"chars"`
-	} `json:"segments"`
+	ID       string    `json:"id"`
+	Version  int       `json:"version"`
+	Success  bool      `json:"success"`
+	Segments []Segment `json:"segments"`
 }
 
 func (p ProcessFiles) Run() {
 	revel.AppLog.Info(p.Filename)
+	var err error
 	mp3Filename := fmt.Sprintf("/data/recordings/%s.mp3", p.UUID)
 	if !strings.HasSuffix(p.Filename, ".mp3") {
-		p.Status = runCommand(fmt.Sprintf("ffmpeg -i %s %s", p.Filename, mp3Filename))
+		p.Status, _ = runCommand(fmt.Sprintf("ffmpeg -i %s %s", p.Filename, mp3Filename))
+		_, duration := runCommand(fmt.Sprintf("ffprobe -i %s -show_entries format=duration -v quiet -of csv='p=0'", p.Filename))
+		p.Duration, err = strconv.ParseFloat(duration, 64)
+		if err != nil {
+			revel.AppLog.Error("Failed to convert file")
+			p.Status = false
+			return
+		}
 	}
 	p.Step += 1
 	p.WriteJSON()
@@ -118,6 +98,10 @@ func (p ProcessFiles) Run() {
 		revel.AppLog.Error("Failed to transcribe file", err)
 		p.Status = false
 		return
+	}
+	for i, el := range p.Transcripts.Segments {
+		p.Transcripts.Segments[i].Text = strings.ReplaceAll(el.Text, ".", ". ")
+		p.Transcripts.Segments[i].Text = strings.ReplaceAll(el.Text, "  ", " ")
 	}
 	p.Step += 1
 	p.WriteJSON()
@@ -179,15 +163,15 @@ func (p ProcessFiles) WriteJSON() {
 	}
 }
 
-func runCommand(cmd string) bool {
+func runCommand(cmd string) (bool, string) {
 	cmdOut, err := exec.Command("/bin/sh", "-c", cmd).Output()
 	if err != nil {
 		revel.AppLog.Error(cmd)
 		revel.AppLog.Error(string(cmdOut), err)
-		return false
+		return false, ""
 	}
 	revel.AppLog.Info(string(cmdOut))
-	return true
+	return true, string(cmdOut)
 }
 
 func transcribe(filename string) (map[string]interface{}, error) {

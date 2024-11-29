@@ -10,6 +10,7 @@ POST    /Upload                                 App.Upload
 POST    /UpdateJSON                             App.UpdateJSON
 POST    /MergeSegment                           App.MergeSegment
 POST    /DeleteRecord                           App.DeleteRecord
+POST	/AddSegment				App.AddSegment
 
 GET     /                                       App.Index
 GET     /Docs                                   App.Docs

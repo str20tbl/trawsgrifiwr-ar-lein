@@ -1,6 +1,7 @@
 package app
 
 import (
+	"app/app/appJobs"
 	"fmt"
 	_ "github.com/revel/modules"
 	"github.com/revel/revel"
@@ -40,8 +41,30 @@ func init() {
 		return fmt.Sprintf("%.0f", sum)
 	}
 
+	revel.TemplateFuncs["len"] = func(input appJobs.Transcript) int {
+		return len(input.Segments) - 1
+	}
+
+	revel.TemplateFuncs["prevTime"] = func(input appJobs.Transcript, index int) float64 {
+		if index == 0 {
+			return 0.0
+		}
+		return input.Segments[index-1].Start
+	}
+
+	revel.TemplateFuncs["nextTime"] = func(input appJobs.Transcript, index int) float64 {
+		if index+1 >= len(input.Segments)-1 {
+			return input.Segments[len(input.Segments)-1].Start
+		}
+		return input.Segments[index+1].Start
+	}
+
 	revel.TemplateFuncs["add"] = func(a, b int) int {
 		return a + b
+	}
+
+	revel.TemplateFuncs["div"] = func(input appJobs.Transcript, b int) int {
+		return int(float64(len(input.Segments)) / float64(b))
 	}
 
 	revel.TemplateFuncs["s2m"] = func(inSeconds float64) string {
