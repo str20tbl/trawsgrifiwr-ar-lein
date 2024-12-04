@@ -45,6 +45,16 @@ func init() {
 		return len(input.Segments) - 1
 	}
 
+	revel.TemplateFuncs["notIn"] = func(uuid string, blackList []string) (fnd bool) {
+		for _, item := range blackList {
+			if uuid == item {
+				fnd = true
+				break
+			}
+		}
+		return !fnd
+	}
+
 	revel.TemplateFuncs["prevTime"] = func(input appJobs.Transcript, index int) float64 {
 		if index == 0 {
 			return 0.0

@@ -101,7 +101,6 @@
         $("#cc-year").text(new Date().getFullYear());
         let fIndex = document.cookie.indexOf("lang=");
         let lang = document.cookie.slice(fIndex+5, fIndex+7);
-        console.log(lang);
         if (lang === "en") {
             $(".cy").hide();
             $(".en").show();

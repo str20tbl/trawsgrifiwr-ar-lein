@@ -77,6 +77,7 @@ func (p ProcessFiles) Run() {
 		return
 	}
 	p.TranscriptID = fmt.Sprintf("%s", tID)
+	revel.AppLog.Infof("%+v", tID)
 	_, err = uuid.Parse(p.TranscriptID)
 	if err != nil {
 		revel.AppLog.Error("Failed to convert file")
@@ -99,9 +100,8 @@ func (p ProcessFiles) Run() {
 		p.Status = false
 		return
 	}
-	for i, el := range p.Transcripts.Segments {
-		p.Transcripts.Segments[i].Text = strings.ReplaceAll(el.Text, ".", ". ")
-		p.Transcripts.Segments[i].Text = strings.ReplaceAll(el.Text, "  ", " ")
+	for i := range p.Transcripts.Segments {
+		p.Transcripts.Segments[i].ID = i
 	}
 	p.Step += 1
 	p.WriteJSON()

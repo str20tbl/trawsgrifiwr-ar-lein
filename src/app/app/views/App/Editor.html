@@ -1,6 +1,6 @@
 {{set . "title" "Home"}}
 {{template "header.html" .}}
-<div class="container">
+<div class="container-fluid">
     <div class="row m-5">
         <div class="row">
             <div class="col-12">
@@ -15,26 +15,33 @@
                         <div class="col-1">
                             <button type="button" id="save" class="btn btn-sm btn-outline-success">
                                 <i data-feather="save"></i>
-                                Cadw
+                                <span class="en">Save</span>
+                                <span class="cy">Cadw</span>
                             </button>
                         </div>
                         <div class="col-1">
+                            {{if notIn .data.UUID .UUIDBlackList}}
                             <button type="submit" id="export" class="btn btn-sm btn-outline-primary">
                                 <i data-feather="download"></i>
                                 SRT
                             </button>
+                            {{end}}
                         </div>
                         <div class="col-1">
+                            {{if notIn .data.UUID .UUIDBlackList}}
                             <button type="submit" id="delete" class="btn btn-sm btn-outline-danger">
                                 <i data-feather="trash-2"></i>
                                 <span class="cy">Dileu</span><span class="en">Delete</span>
                             </button>
+                            {{end}}
                         </div>
                         <div class="col-1">
+                            {{if notIn .data.UUID .UUIDBlackList}}
                             <button type="submit" id="backup" class="btn btn-sm btn-outline-warning">
                                 <i data-feather="refresh-cw"></i>
                                 Backup
                             </button>
+                            {{end}}
                         </div>
                         <div class="col-1"></div>
                         <div class="col-2">
@@ -45,8 +52,8 @@
                         </div>
                         <div class="col-5">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Chwilio" aria-label="chwilio" aria-describedby="button-addon2" id="search-text">
-                                <button class="btn btn-outline-secondary" type="button" id="button-addon2" onclick="search()">Chwilio</button>
+                                <input type="text" class="form-control" placeholder="" aria-label="chwilio" aria-describedby="button-addon2" id="search-text">
+                                <button class="btn btn-outline-secondary" type="button" id="button-addon2" onclick="search()"><span class="cy">Chwilio</span><span class="en">Search</span></button>
                             </div>
                         </div>
                     </div>
@@ -72,98 +79,182 @@
                     </script>
                 </div>
             </div>
-            <div class="col-12" style="min-height: 400px;">
+            <div class="col-12">
                 <div id="editor">
-                    <audio style="width: 100%;" id="audiofile" src="/PlayAudio?uuid={{.data.UUID}}" controls></audio>
+                    <audio style="width: 100%;" id="audiofile" src="/PlayAudio?uuid={{.data.UUID}}" controls controlsList="nodownload"></audio>
                     <br>
                     <div class="row">
                         <div class="col-1">
-                            <button class="btn btn-sm m-3 btn-outline-primary" id="prev"> < </button>
+                            <button class="btn btn-sm m-3 btn-outline-primary" title="segment blaenorol" id="prev"> < </button>
                         </div>
                         <div class="col-10">
                             <div id="customRangeLabel">
                                 <label for="customRange" class="form-label cy">Segmentau</label>
                                 <label for="customRange" class="form-label en">Segments</label>
-                                <input type="range" class="form-range" id="customRange"
-                                       min="0" max="{{len .data.Transcripts}}">
+                                <div id="slider">
+                                    <input type="range" class="form-range" id="customRange"
+                                           min="0" max="{{len .data.Transcripts}}" title="dewis segment">
+                                </div>
                             </div>
                         </div>
                         <div class="col-1">
-                            <button class="btn btn-sm m-3 btn-outline-primary" id="next"> > </button>
+                            <button class="btn btn-sm m-3 btn-outline-primary" title="segment nesaf" id="next"> > </button>
                         </div>
                     </div>
                     <br>
                     <div id="subtitles">
-                        {{range .data.Transcripts.Segments}}
-                        <div id="{{.ID}}_text" class="hide m-3 transcript">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-1">
-                                            ID: {{.ID}}
+                        <div class="row">
+                            <div class="col-2">
+                                {{range .data.Transcripts.Segments}}
+                                <div id="{{.ID}}_text_left" class="hide col-6 transcript h-100 w-100">
+                                    <div class="card m-3 pt-3 h-100">
+                                        <div class="card-header" style="height: 100px">
+                                            <div class="row">
+                                                <div class="col">
+                                                    ID: {{.ID}}
+                                                </div>
+                                                <div class="col">
+                                                    <div>
+                                                        <span class="cy">Diwedd</span><span class="en">End</span>: <span>{{s2m .End}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-9">
-                                            {{.Text}}
-                                        </div>
-                                        <div class="col-2">
-                                            {{if gt .ID 0}}
-                                            <button class="btn btn-sm btn-outline-primary" onclick="mergeSegments({{add .ID -1}}, {{.ID}})">
-                                                Cyfuno gyda
-                                                ID: {{add .ID -1}}
-                                            </button>
-                                            {{else}}
-                                            &nbsp
-                                            {{end}}
+                                        <div class="card-body">
+                                            <span class="align-middle">{{.Text}}</span>
                                         </div>
                                     </div>
                                 </div>
+                                {{end}}
+                            </div>
+                            <div class="col-8">
+                                {{range .data.Transcripts.Segments}}
+                                <div class="card m-3 pt-3 row hide transcript  h-100 w-100" id="{{.ID}}_tran">
+                                    <div class="card-header" style="height: 100px">
+                                        <div class="row">
+                                            <div class="col">
+                                                <button class="btn btn-sm btn-outline-primary" title="chwarae segment o'r cychwyn" id="play-{{.ID}}" onclick="restart_segment({{.ID}})">
+                                                    <svg width="18px" height="18px" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
+                                                        <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"></path>
+                                                    </svg>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-primary" id="repeat-{{.ID}}" title="chwarae segment mewn lŵp " onclick="loop_segment({{.ID}})">
+                                                    <svg width="18px" height="18px" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-recycle" viewBox="0 0 16 16">
+                                                        <path d="M9.302 1.256a1.5 1.5 0 0 0-2.604 0l-1.704 2.98a.5.5 0 0 0 .869.497l1.703-2.981a.5.5 0 0 1 .868 0l2.54 4.444-1.256-.337a.5.5 0 1 0-.26.966l2.415.647a.5.5 0 0 0 .613-.353l.647-2.415a.5.5 0 1 0-.966-.259l-.333 1.242-2.532-4.431zM2.973 7.773l-1.255.337a.5.5 0 1 1-.26-.966l2.416-.647a.5.5 0 0 1 .612.353l.647 2.415a.5.5 0 0 1-.966.259l-.333-1.242-2.545 4.454a.5.5 0 0 0 .434.748H5a.5.5 0 0 1 0 1H1.723A1.5 1.5 0 0 1 .421 12.24l2.552-4.467zm10.89 1.463a.5.5 0 1 0-.868.496l1.716 3.004a.5.5 0 0 1-.434.748h-5.57l.647-.646a.5.5 0 1 0-.708-.707l-1.5 1.5a.498.498 0 0 0 0 .707l1.5 1.5a.5.5 0 1 0 .708-.707l-.647-.647h5.57a1.5 1.5 0 0 0 1.302-2.244l-1.716-3.004z"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <div class="col">
+                                                ID: {{.ID}}
+                                            </div>
+                                            <div class="col">
+                                                <div>
+                                                    <label for="startRange-{{.ID}}" class="form-label"><span class="cy">Dechrau</span><span class="en">Start</span>: <span id="startTime-{{.ID}}">{{s2m .Start}}</span></label>
+                                                    <input type="range" class="form-range" id="startRange-{{.ID}}" step="0.001" value="{{.Start}}" min="{{prevTime $.data.Transcripts .ID}}" max="{{.End}}">
+                                                </div>
+                                            </div>
+                                            <div class="col">
+                                                <div>
+                                                    <label for="endRange-{{.ID}}" class="form-label"><span class="cy">Diwedd</span><span class="en">End</span>: <span id="endTime-{{.ID}}">{{s2m .End}}</span></label>
+                                                    <input type="range" class="form-range" id="endRange-{{.ID}}" step="0.001" value="{{.End}}" min="{{.Start}}" max="{{nextTime $.data.Transcripts .ID}}">
+                                                </div>
+                                            </div>
+                                            <script>
+                                                $(document).on('input', '#startRange-{{.ID}}', function() {
+                                                    let value = Number($(this).val());
+                                                    syncData.forEach(function (element, index, array) {
+                                                        if (index === {{.ID}}) {
+                                                            element.start = value;
+                                                        }
+                                                    });
+                                                    $("#startTime-{{.ID}}").text(value + "s");
+                                                    saveFile();
+                                                });
+                                                $(document).on('input', '#endRange-{{.ID}}', function() {
+                                                    let value = Number($(this).val());
+                                                    syncData.forEach(function (element, index, array) {
+                                                        if (index === {{.ID}}) {
+                                                            element.end = value;
+                                                        }
+                                                    });
+                                                    $("#endTime-{{.ID}}").text(value + "s");
+                                                    saveFile();
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-12 pb-3 ">
+                                                <textarea class="form-control" id="staticEmail2" rows="7" onfocusout="saveFile()">{{.Text}}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="row">
+                                            <div class="col-12 py-3">
+                                                <button class="w-100 input-group-text btn btn-sm btn-outline-primary" onclick="addSegment({{.ID}})">
+                                                    + <span class="en">New</span> Segment <span class="cy">Newydd</span>
+                                                </button>
+                                            </div>
+                                            <div class="col-6">
+                                                {{if gt .ID 0}}
+                                                <button class="w-100 btn btn-sm btn-outline-primary" onclick="mergeSegments({{.ID}}, {{add .ID -1}})">
+                                                    <span class="cy">Cyfuno gyda</span>
+                                                    <span class="en">Merge with</span>
+                                                    ID: {{add .ID -1}}
+                                                </button>
+                                                {{else}}
+                                                &nbsp
+                                                {{end}}
+                                            </div>
+                                            <div class="col-6">
+                                                {{ $length := len $.data.Transcripts }} {{if lt .ID $length}}
+                                                <button class="w-100 btn btn-sm btn-outline-primary" onclick="mergeSegments({{.ID}}, {{add .ID 1}})">
+                                                    <span class="cy">Cyfuno gyda</span>
+                                                    <span class="en">Merge with</span>
+                                                    ID: {{add .ID 1}}
+                                                </button>
+                                                {{else}}
+                                                &nbsp
+                                                {{end}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{end}}
+                            </div>
+                            <div class="col-2">
+                                {{range .data.Transcripts.Segments}}
+                                <div id="{{.ID}}_text_right" class="hide col-6 transcript h-100 w-100">
+                                    <div class="card m-3 pt-3 h-100">
+                                        <div class="card-header" style="height: 100px">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div>
+                                                        <span class="cy">Dechrau</span><span class="en">Start</span>: <span>{{s2m .Start}}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    ID: {{.ID}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <span class="align-middle">{{.Text}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{end}}
                             </div>
                         </div>
-                        <div class="card m-3 pt-3 row hide transcript" id="{{.ID}}_tran">
-                            <table class="table">
-                                <tr>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="restart_segment({{addTime .Start -0.25}})">
-                                            <svg width="18px" height="18px" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
-                                              <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"></path>
-                                            </svg>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-primary" id="repeat-{{.ID}}" onclick="loop_segment('repeat-{{.ID}}', {{addTime .Start -0.25}}, {{addTime .End 0.25}})">
-                                            <svg width="18px" height="18px" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-recycle" viewBox="0 0 16 16">
-                                              <path d="M9.302 1.256a1.5 1.5 0 0 0-2.604 0l-1.704 2.98a.5.5 0 0 0 .869.497l1.703-2.981a.5.5 0 0 1 .868 0l2.54 4.444-1.256-.337a.5.5 0 1 0-.26.966l2.415.647a.5.5 0 0 0 .613-.353l.647-2.415a.5.5 0 1 0-.966-.259l-.333 1.242-2.532-4.431zM2.973 7.773l-1.255.337a.5.5 0 1 1-.26-.966l2.416-.647a.5.5 0 0 1 .612.353l.647 2.415a.5.5 0 0 1-.966.259l-.333-1.242-2.545 4.454a.5.5 0 0 0 .434.748H5a.5.5 0 0 1 0 1H1.723A1.5 1.5 0 0 1 .421 12.24l2.552-4.467zm10.89 1.463a.5.5 0 1 0-.868.496l1.716 3.004a.5.5 0 0 1-.434.748h-5.57l.647-.646a.5.5 0 1 0-.708-.707l-1.5 1.5a.498.498 0 0 0 0 .707l1.5 1.5a.5.5 0 1 0 .708-.707l-.647-.647h5.57a1.5 1.5 0 0 0 1.302-2.244l-1.716-3.004z"></path>
-                                            </svg>
-                                        </button>
-                                    </td>
-                                    <td>ID: {{.ID}}</td>
-                                    <td>
-                                        Start: {{s2m .Start}}
-                                    </td>
-                                    <td>
-                                        End: {{s2m .End}}
-                                    </td>
-                                    <td>
-                                        Segment Newydd
-                                        <br>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="addSegment({{add .ID -1}})">
-                                            cyn
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="addSegment({{.ID}})">
-                                            ar ôl
-                                        </button>
-                                    </td>
-                                </tr>
-                            </table>
-                            <div class="col-sm-12 pb-3">
-                                <textarea class="form-control" id="staticEmail2" rows="5" onfocusout="saveFile()">{{.Text}}</textarea>
-                            </div>
-                        </div>
-                        {{end}}
                     </div>
                     <script>
+                        let loopingID = 0;
+                        let syncData = {{.data.Transcripts.Segments}};
+                        var audioPlayer = document.getElementById("audiofile");
                         function jump() {
-                            let syncData = {{.data.Transcripts.Segments}};
                             let searchID = $("#search-id").val();
-                            var audioPlayer = document.getElementById("audiofile");
                             audioPlayer.currentTime = syncData[Number(searchID)].start;
                         }
                         let oldSearch = "";
@@ -176,8 +267,6 @@
                             } else {
                                 searchCount = 0;
                             }
-                            let syncData = {{.data.Transcripts.Segments}};
-                            var audioPlayer = document.getElementById("audiofile");
                             let foundItem = 0;
                             let newText = ""
                             for (let i = 0; i < syncData.length; i++) {
@@ -198,62 +287,75 @@
                             oldSearch = searchText;
                         }
                         $("#prev").click(function () {
-                            let segments = {{ .data.Transcripts.Segments}};
-                            let audioPlayer = document.getElementById("audiofile");
                             if (Number($("#customRange").val())-1 >= 0 ) {
-                                audioPlayer.currentTime = segments[Number($("#customRange").val())-1].start;
+                                audioPlayer.currentTime = syncData[Number($("#customRange").val())-1].start;
                             }
                         });
                         $("#next").click(function () {
-                            let segments = {{ .data.Transcripts.Segments}};
-                            let audioPlayer = document.getElementById("audiofile");
-                            audioPlayer.currentTime = segments[Number($("#customRange").val()) + 1].start;
+                            if (Number($("#customRange").val())+1 < syncData.length ) {
+                                audioPlayer.currentTime = syncData[Number($("#customRange").val()) + 1].start;
+                            }
                         });
                         $(document).on('input', '#customRange', function() {
-                            let segments = {{ .data.Transcripts.Segments}};
-                            let audioPlayer = document.getElementById("audiofile");
-                            audioPlayer.currentTime = segments[Number($(this).val())].start;
+                            audioPlayer.currentTime = syncData[Number($(this).val())].start;
                         });
-                        function restart_segment(startTime) {
-                            let audioPlayer = document.getElementById("audiofile");
-                            audioPlayer.currentTime = startTime;
-                            audioPlayer.play();
-                        }
-                        let tStart = 0.0;
-                        let tEnd = 0.0;
-                        let checkTime = function () {
-                            let audioPlayer = document.getElementById("audiofile");
-                            if (audioPlayer.currentTime >= tEnd) {
-                                audioPlayer.currentTime = tStart;
+                        function restart_segment(id) {
+                            let playButton = $("#play-"+id);
+                            let playing = playButton.hasClass("playing");
+                            if (!playing) {
+                                audioPlayer.currentTime = syncData[id].start;
+                                audioPlayer.play();
+                                playButton.addClass("playing");
+                                playButton.empty().append(
+                                    '<svg width="18px" height="18px" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-stop-fill" viewBox="0 0 16 16"><path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"></path></svg>'
+                                );
+                            } else {
+                                audioPlayer.pause();
+                                playButton.removeClass("playing");
+                                playButton.empty().append(
+                                    '<svg width="18px" height="18px" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"></path></svg>'
+                                );
+                                audioPlayer.removeEventListener("timeupdate", checkTime);
+                                $("#repeat-"+id).removeClass("btn-primary").addClass("btn-outline-primary");
                             }
                         }
-                        function loop_segment(divID, startTime, endTime) {
-                            tStart = startTime;
-                            tEnd = endTime;
-                            let looping = $("#"+divID).hasClass("btn-primary");
+                        let checkTime = function () {
+                            if (audioPlayer.currentTime >= syncData[loopingID].end) {
+                                audioPlayer.currentTime = syncData[loopingID].start;
+                            }
+                        }
+                        function loop_segment(id) {
+                            loopingID = id;
+                            let looping = $("#repeat-"+id).hasClass("btn-primary");
+                            let playButton = $("#play-"+id);
                             looping = !looping;
-                            let audioPlayer = document.getElementById("audiofile");
                             if (looping) {
                                 audioPlayer.addEventListener("timeupdate", checkTime);
-                                audioPlayer.currentTime = startTime;
+                                audioPlayer.currentTime = syncData[id].start;
                                 audioPlayer.play();
-                                $("#"+divID).removeClass("btn-outline-primary").addClass("btn-primary");
+                                $("#repeat-"+id).removeClass("btn-outline-primary").addClass("btn-primary");
+                                playButton.addClass("playing");
+                                playButton.empty().append(
+                                    '<svg width="18px" height="18px" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-stop-fill" viewBox="0 0 16 16"><path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"></path></svg>'
+                                );
                             } else {
                                 audioPlayer.removeEventListener("timeupdate", checkTime);
-                                $("#"+divID).removeClass("btn-primary").addClass("btn-outline-primary");
+                                $("#repeat-"+id).removeClass("btn-primary").addClass("btn-outline-primary");
                             }
                         }
                         function saveFile() {
-                            let syncData = {{.data.Transcripts.Segments}};
                             syncData.forEach(function (element, index, array) {
-                                let this_div = $("#" + index + "_tran");
-                                element.text = this_div.find("textarea").val();
+                                element.text = $("#" + index + "_tran").find("textarea").val();
+                                element.start = Number($("#startRange-"+index).val());
+                                element.end = Number($("#endRange-"+index).val());
                             });
+                            let data = {{.data.Transcripts}};
+                            data.segments = syncData;
                             $.ajax({
                                 type: "POST",
                                 data :JSON.stringify({
                                     "uuid": "{{.data.UUID}}",
-                                    "data": syncData,
+                                    "data": data,
                                 }),
                                 url: "/UpdateJSON",
                                 contentType: "application/json"
@@ -270,28 +372,21 @@
                                 contentType: "application/json",
                                 success: function(data) {
                                     $("#subtitles").html(data);
-                                    var audioPlayer = document.getElementById("audiofile");
-                                    var syncData = {{.data.Transcripts.Segments}};
-                                    $('#customRange').attr('max', syncData.length);
-                                    syncData.forEach(function (element, index, array) {
-                                        let start = element.start;
-                                        if (index === 0) {
-                                            if (audioPlayer.currentTime === 0) {
-                                                start = 0
-                                            }
-                                        }
-                                        if (audioPlayer.currentTime >= start && audioPlayer.currentTime <= element.end) {
-                                            $(".transcript").hide();
-                                            let this_div = $("#" + index + "_tran");
-                                            this_div.show();
-                                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-primary");
-                                            if (index < syncData.length) {
-                                                let next_div = $("#" + (index + 1) + "_text");
-                                                next_div.show();
-                                                next_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-dark-soft");
-                                            }
+                                    $.ajax({
+                                        type: "POST",
+                                        data: JSON.stringify({
+                                            "uuid": "{{.data.UUID}}",
+                                        }),
+                                        url: "/GetData",
+                                        contentType: "application/json",
+                                        success: function (transcripts) {
+                                            transcripts = JSON.parse(transcripts);
+                                            syncData = transcripts.Transcripts.segments;
                                         }
                                     });
+                                    $('#customRange').attr('max', syncData.length);
+                                    startApp();
+                                    audioPlayer.currentTime = syncData[id].end + 0.11;
                                 }
                             });
                         }
@@ -306,25 +401,32 @@
                                 data :JSON.stringify(data),
                                 url: "/MergeSegment",
                                 contentType: "application/json",
-                                success: function(data) {
-                                    $("#subtitles").html(data);
-                                    var audioPlayer = document.getElementById("audiofile");
-                                    var syncData = {{.data.Transcripts.Segments}};
+                                success: function(newHTML) {
+                                    $("#subtitles").html(newHTML);
+                                    $.ajax({
+                                        type: "POST",
+                                        data: JSON.stringify({
+                                            "uuid": "{{.data.UUID}}",
+                                        }),
+                                        url: "/GetData",
+                                        contentType: "application/json",
+                                        success: function (transcripts) {
+                                            transcripts = JSON.parse(transcripts);
+                                            syncData = transcripts.Transcripts.segments;
+                                        }
+                                    });
                                     $('#customRange').attr('max', syncData.length);
                                     syncData.forEach(function (element, index, array) {
+                                        index = idA
+                                        $("#customRange").val(index);
                                         let start = element.start;
                                         if (index === 0) {
                                             if (audioPlayer.currentTime === 0) {
                                                 start = 0
                                             }
                                         }
-                                        if (audioPlayer.currentTime >= start && audioPlayer.currentTime <= element.end) {
+                                        if (Math.fround(audioPlayer.currentTime) >= Math.fround(start) && Math.fround(audioPlayer.currentTime) < Math.fround(element.end)) {
                                             $(".transcript").hide();
-                                            // if (index > 0) {
-                                            //     let previous_div = $("#" + (index - 1) + "_text");
-                                            //     previous_div.show();
-                                            //     previous_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-dark-soft");
-                                            // }
                                             let this_div = $("#" + index + "_tran");
                                             this_div.show();
                                             this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-primary");
@@ -335,13 +437,11 @@
                                             }
                                         }
                                     });
+                                    startApp();
                                 },
                             });
                         }
                         (function (win, doc) {
-                            var audioPlayer = doc.getElementById("audiofile");
-                            var subtitles = doc.getElementById("subtitles");
-                            var syncData = {{.data.Transcripts.Segments}};
                             $("#save").click(function () {
                                 syncData.forEach(function (element, index, array) {
                                     let this_div = $("#" + index + "_tran");
@@ -359,21 +459,17 @@
                             });
                             audioPlayer.addEventListener("timeupdate", function (e) {
                                 syncData.forEach(function (element, index, array) {
-                                    if (Math.fround(audioPlayer.currentTime) >= Math.fround(element.start) && Math.fround(audioPlayer.currentTime) < Math.fround(element.end)) {
+                                    if (Math.fround(audioPlayer.currentTime) >= Math.fround(element.start) && Math.fround(audioPlayer.currentTime) <= Math.fround(element.end)) {
                                         $(".transcript").hide();
-                                        // if (index > 0) {
-                                        //     let previous_div = $("#" + (index - 1) + "_text");
-                                        //     previous_div.show();
-                                        //     previous_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-dark-soft");
-                                        // }
                                         let this_div = $("#" + index + "_tran");
                                         this_div.show();
                                         this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-primary");
                                         $("#customRange").val(element.id);
                                         if (index < syncData.length) {
-                                            let next_div = $("#" + (index + 1) + "_text");
+                                            let next_div = $("#" + (index + 1) + "_text_right");
                                             next_div.show();
-                                            next_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-dark-soft");
+                                            let prev_div = $("#" + (index - 1) + "_text_left");
+                                            prev_div.show();
                                         }
                                     }
                                 });
@@ -383,6 +479,22 @@
                                 });
                             });
                         }(window, document));
+                        function startApp() {
+                            let fIndex = document.cookie.indexOf("lang=");
+                            let lang = document.cookie.slice(fIndex+5, fIndex+7);
+                            if (lang === "en") {
+                                $(".cy").hide();
+                                $(".en").show();
+                                $("#lang-sel").text("Cymraeg");
+                                document.cookie = "lang=en;secure";
+                            } else {
+                                $(".en").hide();
+                                $(".cy").show();
+                                $("#lang-sel").text("English");
+                                document.cookie = "lang=cy;secure";
+                            }
+                            feather.replace();
+                        }
                         $(document).ready(function () {
                             let this_div = $("#0_tran");
                             this_div.show();
@@ -391,9 +503,8 @@
                             next_div.show();
                             // next_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-dark-soft");
                             $("#customRange").val({{.segmentID}});
-                            let segments = {{.data.Transcripts.Segments}};
-                            let audioPlayer = document.getElementById("audiofile");
-                            audioPlayer.currentTime = segments[{{.segmentID}}].start;
+                            audioPlayer.currentTime = syncData[{{.segmentID}}].start;
+                            startApp();
                         });
                     </script>
                 </div>
