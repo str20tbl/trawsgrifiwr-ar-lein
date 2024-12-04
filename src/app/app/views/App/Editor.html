@@ -304,6 +304,8 @@
                             let playing = playButton.hasClass("playing");
                             if (!playing) {
                                 audioPlayer.currentTime = syncData[id].start;
+                                loopingID = id;
+                                audioPlayer.addEventListener("timeupdate", checkTimeEnd);
                                 audioPlayer.play();
                                 playButton.addClass("playing");
                                 playButton.empty().append(
@@ -322,6 +324,17 @@
                         let checkTime = function () {
                             if (audioPlayer.currentTime >= syncData[loopingID].end) {
                                 audioPlayer.currentTime = syncData[loopingID].start;
+                            }
+                        }
+                        let checkTimeEnd = function () {
+                            if (audioPlayer.currentTime >= syncData[loopingID].end) {
+                                audioPlayer.pause();
+                                let playButton = $("#play-"+loopingID);
+                                playButton.removeClass("playing");
+                                playButton.empty().append(
+                                    '<svg width="18px" height="18px" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"></path></svg>'
+                                );
+                                audioPlayer.removeEventListener("timeupdate", checkTimeEnd);
                             }
                         }
                         function loop_segment(id) {
