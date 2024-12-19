@@ -25,8 +25,8 @@ type ProcessFiles struct {
 	Step             int
 	Status           bool
 	Duration         float64
-	Started          time.Time
-	Updated          time.Time
+	Started          string
+	Updated          string
 	Transcripts      Transcript
 	TranscriptID     string
 }
@@ -50,6 +50,7 @@ func (p ProcessFiles) Run() {
 	var err error
 	mp3Filename := fmt.Sprintf("/data/recordings/%s.mp3", p.UUID)
 	if !strings.HasSuffix(p.Filename, ".mp3") {
+		_, _ = runCommand(fmt.Sprintf("ffmpeg -i %s -acodec pcm_s16le -ac 1 -ar 16000 %s", p.Filename, strings.Replace(mp3Filename, ".mp3", ".wav", -1)))
 		p.Status, _ = runCommand(fmt.Sprintf("ffmpeg -i %s %s", p.Filename, mp3Filename))
 		_, duration := runCommand(fmt.Sprintf("ffprobe -i %s -show_entries format=duration -v quiet -of csv='p=0'", p.Filename))
 		p.Duration, err = strconv.ParseFloat(duration, 64)
