@@ -436,9 +436,17 @@ func (c *App) Upload(file []byte) revel.Result {
 	}
 
 	fileUUID := uuid.New()
+	fileUUIDt := uuid.New()
 	fileExt := filepath.Ext(c.Params.Files["file"][0].Filename)
 	filename := fmt.Sprintf("/data/recordings/%s%s", fileUUID.String(), fileExt)
+	filenamet := fmt.Sprintf("/data/recordings/%s%s", fileUUIDt.String(), fileExt)
 	err := os.WriteFile(filename, file, 0644)
+	if err != nil {
+		c.Validation.Error("Uwchlwytho ffeil wedi methu || File upload failed.")
+		c.FlashParams()
+		return c.Redirect((*App).Index)
+	}
+	err = os.WriteFile(filenamet, file, 0644)
 	if err != nil {
 		c.Validation.Error("Uwchlwytho ffeil wedi methu || File upload failed.")
 		c.FlashParams()
@@ -449,6 +457,7 @@ func (c *App) Upload(file []byte) revel.Result {
 		OriginalFilename: c.Params.Files["file"][0].Filename,
 		Filename:         filename,
 		UUID:             fileUUID.String(),
+		UUIDTemp:         filenamet,
 		Size:             float64(len(file)) / float64(KB),
 		Step:             1,
 		Status:           true,
