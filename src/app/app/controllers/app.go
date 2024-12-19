@@ -356,9 +356,9 @@ func (c *App) UpdateJSON() revel.Result {
 		revel.AppLog.Error("Unable to open JSON")
 	}
 	originalJSON.Transcripts = jsonData.Data
-	originalJSON.Updated = time.Now()
-	if originalJSON.Started.IsZero() {
-		originalJSON.Started = time.Now()
+	originalJSON.Updated = time.Now().Format("2006-01-02 15:04")
+	if originalJSON.Started == "0001-01-01T00:00:00Z" || originalJSON.Started == "" {
+		originalJSON.Started = time.Now().Format("2006-01-02 15:04")
 	}
 	originalJSON.WriteJSON()
 	return c.RenderJSON(`{"success": "True"}`)
@@ -366,6 +366,12 @@ func (c *App) UpdateJSON() revel.Result {
 
 var UUIDBlackList = []string{
 	"d32a21ff-b1a3-4e92-b5f4-6f81f9e36bc8",
+	"5b878f9b-6ede-440d-8393-0f38b19645df",
+	"e44e1367-561b-482b-bead-876a9b841631",
+	"09a9b06d-e014-4ee2-bdf0-5646440b2afd",
+	"b64c90d4-67ad-4be6-90d7-b0f15b6d09ed",
+	"cc17423a-65b7-46c8-947e-b3eb44fb856a",
+	"73566209-4245-417b-970e-da24eb832f05",
 }
 
 func (c *App) Editor(uuid string, segmentID int) revel.Result {
@@ -377,7 +383,7 @@ func (c *App) Editor(uuid string, segmentID int) revel.Result {
 }
 
 func (c *App) PlayAudio(uuid string) revel.Result {
-	audio, _ := os.Open(fmt.Sprintf("/data/recordings/%s.mp3", uuid))
+	audio, _ := os.Open(fmt.Sprintf("/data/recordings/%s.wav", uuid))
 	return c.RenderFile(audio, revel.Attachment)
 }
 
