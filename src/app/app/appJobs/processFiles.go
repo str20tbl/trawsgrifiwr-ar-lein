@@ -21,6 +21,7 @@ type ProcessFiles struct {
 	OriginalFilename string
 	Filename         string
 	UUID             string
+	UUIDTemp         string
 	Size             float64
 	Step             int
 	Status           bool
@@ -49,16 +50,19 @@ func (p ProcessFiles) Run() {
 	revel.AppLog.Info(p.Filename)
 	var err error
 	mp3Filename := fmt.Sprintf("/data/recordings/%s.mp3", p.UUID)
-	if !strings.HasSuffix(p.Filename, ".mp3") {
-		_, _ = runCommand(fmt.Sprintf("ffmpeg -i %s -acodec pcm_s16le -ac 1 -ar 16000 %s", p.Filename, strings.Replace(mp3Filename, ".mp3", ".wav", -1)))
-		p.Status, _ = runCommand(fmt.Sprintf("ffmpeg -i %s %s", p.Filename, mp3Filename))
-		_, duration := runCommand(fmt.Sprintf("ffprobe -i %s -show_entries format=duration -v quiet -of csv='p=0'", p.Filename))
-		p.Duration, err = strconv.ParseFloat(duration, 64)
-		if err != nil {
-			revel.AppLog.Error("Failed to convert file")
-			p.Status = false
-			return
-		}
+	wavFilename := fmt.Sprintf("/data/recordings/%s.wav", p.UUID)
+	_, _ = runCommand(fmt.Sprintf("ffmpeg -i %s -acodec pcm_s16le -ac 1 -ar 16000 %s", p.UUIDTemp, wavFilename))
+	if !strings.HasSuffix(p.UUIDTemp, "mp3") {
+		p.Status, _ = runCommand(fmt.Sprintf("ffmpeg -i %s %s", p.UUIDTemp, mp3Filename))
+	} else {
+		p.Status, _ = runCommand(fmt.Sprintf("cp %s %s", p.UUIDTemp, mp3Filename))
+	}
+	_, duration := runCommand(fmt.Sprintf("ffprobe -i %s -show_entries format=duration -v quiet -of csv='p=0'", p.Filename))
+	p.Duration, err = strconv.ParseFloat(strings.Trim(duration, "\n"), 64)
+	if err != nil {
+		revel.AppLog.Error("Failed to convert file", err)
+		p.Status = false
+		return
 	}
 	p.Step += 1
 	p.WriteJSON()
@@ -85,6 +89,7 @@ func (p ProcessFiles) Run() {
 		p.Status = false
 		return
 	}
+	p.WriteJSON()
 	for {
 		time.Sleep(30 * time.Second)
 		gotTranscript, err := getStatus(p.TranscriptID)
