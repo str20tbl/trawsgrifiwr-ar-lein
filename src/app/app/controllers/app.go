@@ -372,6 +372,21 @@ var UUIDBlackList = []string{
 	"b64c90d4-67ad-4be6-90d7-b0f15b6d09ed",
 	"cc17423a-65b7-46c8-947e-b3eb44fb856a",
 	"73566209-4245-417b-970e-da24eb832f05",
+	"6a9e26f9-ed5f-47a3-976b-66b39d1e7251",
+	"92f82aa6-4c2c-4819-a612-9bbf1d5fa618",
+	"8c68b86c-9031-4817-8d49-071b6f18cff5",
+	"1280b37c-8cde-4d32-8492-9004eb7620f2",
+	"e740cf15-b39a-4480-a4a2-b06de0c5388d",
+	"3134ca38-67ad-4440-9ab1-80931bed1387",
+	"3264c16b-c238-44a9-a282-8aa88d45516f",
+	"b89330c3-c647-4b39-83de-e3531c722aa9",
+	"48450467-0286-4f05-bbf3-e6430b0e454a",
+	"ffcfdee7-f5d2-41cd-b736-a6dc10d24552",
+	"b0ffe67b-d555-47d2-9a8f-6ed5f74c4861",
+	"cffce654-4a9d-45db-a665-c3c0e19cf955",
+	"427731ed-7405-470b-b7ea-5f3570aefecd",
+	"9125c49a-581a-4a54-95ea-0bb51d49f3ac",
+	"21965db8-0a02-41e5-bb56-d42b8cc9fec0",
 }
 
 func (c *App) Editor(uuid string, segmentID int) revel.Result {
