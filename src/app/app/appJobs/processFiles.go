@@ -148,24 +148,26 @@ func (p ProcessFiles) AsJSON() string {
 }
 
 func (p ProcessFiles) WriteJSON() {
-	filepath := fmt.Sprintf("/data/recordings/%s.json", p.UUID)
-	f, err := os.Create(filepath)
-	if err != nil {
-		revel.AppLog.Error("Unable to create file to save JSON", err)
-	}
-	defer func() {
-		err := f.Close()
+	if len(p.Transcripts.Segments) > 0 {
+		filepath := fmt.Sprintf("/data/recordings/%s.json", p.UUID)
+		f, err := os.Create(filepath)
 		if err != nil {
-			revel.AppLog.Error("Unable to close JSON file", err)
+			revel.AppLog.Error("Unable to create file to save JSON", err)
 		}
-	}()
-	asJSON, err := json.MarshalIndent(p, "", "\t")
-	if err != nil {
-		revel.AppLog.Error("Unable to marshal JSON", err)
-	}
-	_, err = f.Write(asJSON)
-	if err != nil {
-		revel.AppLog.Error("Unable to save JSON", err)
+		defer func() {
+			err := f.Close()
+			if err != nil {
+				revel.AppLog.Error("Unable to close JSON file", err)
+			}
+		}()
+		asJSON, err := json.MarshalIndent(p, "", "\t")
+		if err != nil {
+			revel.AppLog.Error("Unable to marshal JSON", err)
+		}
+		_, err = f.Write(asJSON)
+		if err != nil {
+			revel.AppLog.Error("Unable to save JSON", err)
+		}
 	}
 }
 
