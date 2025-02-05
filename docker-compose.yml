@@ -16,6 +16,15 @@ services:
       - "7070:9000"
     depends_on:
       - redis
+  test:
+    build:
+      dockerfile: "./DockerfileTests"
+    container_name: test-trawsgrifiwr
+    command: ["go", "test", "-v"]
+    volumes:
+      - "./src/app:/usr/src/app"
+      - "./data/recordings:/data/recordings"
+
 volumes:
   redis_data: {}
 

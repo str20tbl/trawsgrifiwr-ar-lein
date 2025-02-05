@@ -1,6 +1,7 @@
 package appJobs
 
 import (
+	"app/app/models"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -28,22 +29,8 @@ type ProcessFiles struct {
 	Duration         float64
 	Started          string
 	Updated          string
-	Transcripts      Transcript
+	Transcripts      models.Transcript
 	TranscriptID     string
-}
-
-type Segment struct {
-	ID    int     `json:"id"`
-	Start float64 `json:"start"`
-	End   float64 `json:"end"`
-	Text  string  `json:"text"`
-}
-
-type Transcript struct {
-	ID       string    `json:"id"`
-	Version  int       `json:"version"`
-	Success  bool      `json:"success"`
-	Segments []Segment `json:"segments"`
 }
 
 func (p ProcessFiles) Run() {
@@ -253,7 +240,7 @@ func getStatus(uuid string) (bool, error) {
 	return status == "SUCCESS", nil
 }
 
-func getVAD(uuid string) (t Transcript, err error) {
+func getVAD(uuid string) (t models.Transcript, err error) {
 	requestString := fmt.Sprintf("https://api-dev.techiaith.cymru/speech-to-text/v2/get_json/?stt_id=%s&api_key=11111", uuid)
 	req, err := http.NewRequest("GET", requestString, nil)
 	if err != nil {

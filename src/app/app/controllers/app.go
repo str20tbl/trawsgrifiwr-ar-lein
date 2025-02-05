@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"app/app/appJobs"
+	"app/app/models"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 	"github.com/revel/modules/jobs/app/jobs"
 	"github.com/revel/revel"
 	"html/template"
-	"log"
 	"math"
 	"os"
 	"path/filepath"
@@ -26,19 +26,19 @@ var tmlpFuncs = template.FuncMap{
 	"s2m": func(inSeconds float64) string {
 		return time.Duration(inSeconds * float64(time.Second)).String()
 	},
-	"prevTime": func(input appJobs.Transcript, index int) float64 {
+	"prevTime": func(input models.Transcript, index int) float64 {
 		if index == 0 {
 			return 0.0
 		}
 		return input.Segments[index-1].Start
 	},
-	"nextTime": func(input appJobs.Transcript, index int) float64 {
+	"nextTime": func(input models.Transcript, index int) float64 {
 		if index+1 >= len(input.Segments)-1 {
 			return input.Segments[len(input.Segments)-1].Start
 		}
 		return input.Segments[index+1].Start
 	},
-	"len": func(input appJobs.Transcript) int {
+	"len": func(input models.Transcript) int {
 		return len(input.Segments) - 1
 	},
 	"notIn": func(uuid string, blackList []string) (fnd bool) {
@@ -218,30 +218,7 @@ func (c *App) AddSegment() revel.Result {
 		revel.AppLog.Error("Unable to bind JSON", err)
 	}
 	data := fetchJSON(jsonData.UUID)
-	endTime := data.Duration
-	if jsonData.ID < len(data.Transcripts.Segments)-1 {
-		endTime = data.Transcripts.Segments[jsonData.ID+1].Start - 0.1
-	}
-	startTime := data.Transcripts.Segments[jsonData.ID].End + 0.1
-	if endTime-startTime > 1 {
-		newSeg := appJobs.Segment{
-			ID:    0,
-			Start: roundFloat(startTime, 3),
-			End:   roundFloat(endTime, 3),
-			Text:  "",
-		}
-		tList := make([]appJobs.Segment, 0)
-		for i, el := range data.Transcripts.Segments {
-			tList = append(tList, el)
-			if i == jsonData.ID {
-				tList = append(tList, newSeg)
-			}
-		}
-		data.Transcripts.Segments = tList
-	}
-	for i, _ := range data.Transcripts.Segments {
-		data.Transcripts.Segments[i].ID = i
-	}
+	data.Transcripts.NewSegment(jsonData.ID, data.Duration)
 	data.WriteJSON()
 	tmpl, err := template.New("page").Funcs(tmlpFuncs).Parse(page)
 	if err != nil {
@@ -273,12 +250,7 @@ func (c *App) MergeSegment() revel.Result {
 		revel.AppLog.Error("Unable to bind JSON", err)
 	}
 	data := fetchJSON(jsonData.UUID)
-	data.Transcripts.Segments[jsonData.IDa].End = data.Transcripts.Segments[jsonData.IDb].End
-	data.Transcripts.Segments[jsonData.IDa].Text += " " + data.Transcripts.Segments[jsonData.IDb].Text
-	data.Transcripts.Segments = append(data.Transcripts.Segments[:jsonData.IDb], data.Transcripts.Segments[jsonData.IDb+1:]...)
-	for i, _ := range data.Transcripts.Segments {
-		data.Transcripts.Segments[i].ID = i
-	}
+	data.Transcripts.MergeSegments(jsonData.IDa, jsonData.IDb)
 	data.WriteJSON()
 	tmpl, err := template.New("page").Funcs(tmlpFuncs).Parse(page)
 	if err != nil {
@@ -326,23 +298,14 @@ func fetchJSON(uuid string) (data appJobs.ProcessFiles) {
 
 func (c *App) ExportSRT(uuid string) revel.Result {
 	data := fetchJSON(uuid)
-	srtData := ""
-	for _, el := range data.Transcripts.Segments {
-		start := time.Unix(0, 0).UTC().Add(time.Duration(el.Start * float64(time.Second))).Format("T15:04:05.999Z")
-		end := time.Unix(0, 0).UTC().Add(time.Duration(el.End * float64(time.Second))).Format("T15:04:05.999Z")
-		srtData += fmt.Sprintf("%d\n%s --> %s\n%s\n\n", el.ID, start, end, el.Text)
-	}
-	srtFilename := fmt.Sprintf("/data/recordings/%s.srt", uuid)
-	if err := os.WriteFile(srtFilename, []byte(srtData), 0666); err != nil {
-		log.Fatal(err)
-	}
+	srtFilename := data.Transcripts.ExportSRT(uuid)
 	return c.RenderFileName(srtFilename, revel.Attachment)
 }
 
 func (c *App) UpdateJSON() revel.Result {
 	var jsonData struct {
-		UUID string             `json:"uuid"`
-		Data appJobs.Transcript `json:"data"`
+		UUID string            `json:"uuid"`
+		Data models.Transcript `json:"data"`
 	}
 	err := c.Params.BindJSON(&jsonData)
 	if err != nil {
@@ -398,6 +361,7 @@ var UUIDBlackList = []string{
 	"f0f5bdee-4f63-4f26-9332-f7f2cd0bd88f",
 	"0e46bb4a-f114-4367-8b61-dc93aa704440",
 	"de68c6e4-34d1-47eb-9132-6f43c1fe4df7",
+	"8c68b86c-9031-4817-8d49-071b6f18cffo",
 }
 
 func (c *App) Editor(uuid string, segmentID int) revel.Result {
