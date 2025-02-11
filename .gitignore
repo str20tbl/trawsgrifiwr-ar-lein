@@ -27,3 +27,4 @@ go.work.sum
 data/recordings/*
 src/app/log/
 src/app/target/
+data/exports

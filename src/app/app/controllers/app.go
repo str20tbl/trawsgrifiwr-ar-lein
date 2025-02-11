@@ -137,9 +137,8 @@ func (c *App) PlayAudio(uuid string) revel.Result {
 	return c.RenderFile(audio, revel.Attachment)
 }
 
-// Correct show the transcription progress to the user
-// TODO :: Rename method to something more sensible
-func (c *App) Correct(uuid string) revel.Result {
+// Transcribe show the transcription progress to the user
+func (c *App) Transcribe(uuid string) revel.Result {
 	data := fetchJSON(uuid)
 	return c.Render(data)
 }
@@ -218,5 +217,5 @@ func (c *App) Upload(file []byte) revel.Result {
 	job.WriteJSON(false)
 	jobs.Now(job)
 
-	return c.Redirect((*App).Correct, fileUUID.String())
+	return c.Redirect((*App).Transcribe, fileUUID.String())
 }

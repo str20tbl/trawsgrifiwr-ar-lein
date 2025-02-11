@@ -115,7 +115,7 @@
                                                 </div>
                                                 <div class="col">
                                                     <div>
-                                                        <span class="cy">Diwedd</span><span class="en">End</span>: <span>{{s2m .End}}</span>
+                                                        <span class="cy">Diwedd</span><span class="en">End</span>: <span id="end_time_left_{{.ID}}">{{s2m .End}}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -168,6 +168,7 @@
                                                         }
                                                     });
                                                     $("#startTime-{{.ID}}").text(value + "s");
+                                                    $("#start_time_right_{{.ID}}").text(value + "s");
                                                     saveFile();
                                                 });
                                                 $(document).on('input', '#endRange-{{.ID}}', function() {
@@ -178,6 +179,7 @@
                                                         }
                                                     });
                                                     $("#endTime-{{.ID}}").text(value + "s");
+                                                    $("#end_time_left_{{.ID}}").text(value + "s");
                                                     saveFile();
                                                 });
                                             </script>
@@ -232,7 +234,7 @@
                                             <div class="row">
                                                 <div class="col">
                                                     <div>
-                                                        <span class="cy">Dechrau</span><span class="en">Start</span>: <span>{{s2m .Start}}</span>
+                                                        <span class="cy">Dechrau</span><span class="en">Start</span>: <span id="start_time_right_{{.ID}}">{{s2m .Start}}</span>
                                                     </div>
                                                 </div>
                                                 <div class="col">
