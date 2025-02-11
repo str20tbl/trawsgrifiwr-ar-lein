@@ -1,7 +1,7 @@
 package app
 
 import (
-	"app/app/appJobs"
+	"app/app/models"
 	"fmt"
 	_ "github.com/revel/modules"
 	"github.com/revel/revel"
@@ -41,7 +41,7 @@ func init() {
 		return fmt.Sprintf("%.0f", sum)
 	}
 
-	revel.TemplateFuncs["len"] = func(input appJobs.Transcript) int {
+	revel.TemplateFuncs["len"] = func(input models.Transcript) int {
 		return len(input.Segments) - 1
 	}
 
@@ -55,14 +55,14 @@ func init() {
 		return !fnd
 	}
 
-	revel.TemplateFuncs["prevTime"] = func(input appJobs.Transcript, index int) float64 {
+	revel.TemplateFuncs["prevTime"] = func(input models.Transcript, index int) float64 {
 		if index == 0 {
 			return 0.0
 		}
 		return input.Segments[index-1].Start
 	}
 
-	revel.TemplateFuncs["nextTime"] = func(input appJobs.Transcript, index int) float64 {
+	revel.TemplateFuncs["nextTime"] = func(input models.Transcript, index int) float64 {
 		if index+1 >= len(input.Segments)-1 {
 			return input.Segments[len(input.Segments)-1].Start
 		}
@@ -73,7 +73,7 @@ func init() {
 		return a + b
 	}
 
-	revel.TemplateFuncs["div"] = func(input appJobs.Transcript, b int) int {
+	revel.TemplateFuncs["div"] = func(input models.Transcript, b int) int {
 		return int(float64(len(input.Segments)) / float64(b))
 	}
 

@@ -24,6 +24,11 @@ type Segment struct {
 
 // MergeSegments merge the segments IDa & IDb into a single segment and re index the entire list
 func (t *Transcript) MergeSegments(IDa, IDb int) {
+	tID := IDa
+	if IDb < IDa {
+		IDa = IDb
+		IDb = tID
+	}
 	// set the end time to the end time of IDb
 	t.Segments[IDa].End = t.Segments[IDb].End
 	// concatenate the text from both segments

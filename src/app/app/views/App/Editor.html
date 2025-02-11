@@ -439,15 +439,8 @@
                                             }
                                         }
                                         if (Math.fround(audioPlayer.currentTime) >= Math.fround(start) && Math.fround(audioPlayer.currentTime) < Math.fround(element.end)) {
-                                            $(".transcript").hide();
-                                            let this_div = $("#" + index + "_tran");
-                                            this_div.show();
-                                            this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-primary");
-                                            if (index < syncData.length) {
-                                                let next_div = $("#" + (index + 1) + "_text");
-                                                next_div.show();
-                                                next_div.find("textarea").attr('readonly','readonly').removeClass("border-primary").addClass("bg-dark-soft");
-                                            }
+                                            alignDivs(element, index);
+                                            window.location.reload();
                                         }
                                     });
                                     startApp();
@@ -472,19 +465,7 @@
                             });
                             audioPlayer.addEventListener("timeupdate", function (e) {
                                 syncData.forEach(function (element, index, array) {
-                                    if (Math.fround(audioPlayer.currentTime) >= Math.fround(element.start) && Math.fround(audioPlayer.currentTime) <= Math.fround(element.end)) {
-                                        $(".transcript").hide();
-                                        let this_div = $("#" + index + "_tran");
-                                        this_div.show();
-                                        this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-primary");
-                                        $("#customRange").val(element.id);
-                                        if (index < syncData.length) {
-                                            let next_div = $("#" + (index + 1) + "_text_right");
-                                            next_div.show();
-                                            let prev_div = $("#" + (index - 1) + "_text_left");
-                                            prev_div.show();
-                                        }
-                                    }
+                                    alignDivs(element, index);
                                 });
                                 syncData.forEach(function (element, index, array) {
                                     let this_div = $("#" + index + "_tran");
@@ -507,6 +488,21 @@
                                 document.cookie = "lang=cy;secure";
                             }
                             feather.replace();
+                        }
+                        function alignDivs(element, index) {
+                            if (Math.fround(audioPlayer.currentTime) >= Math.fround(element.start) && Math.fround(audioPlayer.currentTime) <= Math.fround(element.end)) {
+                                $(".transcript").hide();
+                                let this_div = $("#" + index + "_tran");
+                                this_div.show();
+                                this_div.find("textarea").removeAttr('readonly').removeClass("bg-dark-soft").addClass("border-primary");
+                                $("#customRange").val(element.id);
+                                if (index < syncData.length) {
+                                    let next_div = $("#" + (index + 1) + "_text_right");
+                                    next_div.show();
+                                    let prev_div = $("#" + (index - 1) + "_text_left");
+                                    prev_div.show();
+                                }
+                            }
                         }
                         $(document).ready(function () {
                             let this_div = $("#0_tran");

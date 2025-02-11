@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/revel/revel"
+	"github.com/rogpeppe/go-internal/lockedfile"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -52,7 +53,7 @@ func (p ProcessFiles) Run() {
 		return
 	}
 	p.Step += 1
-	p.WriteJSON()
+	p.WriteJSON(true)
 	if !p.Status {
 		revel.AppLog.Error("Failed to convert file")
 		return
@@ -76,7 +77,7 @@ func (p ProcessFiles) Run() {
 		p.Status = false
 		return
 	}
-	p.WriteJSON()
+	p.WriteJSON(true)
 	for {
 		time.Sleep(30 * time.Second)
 		gotTranscript, err := getStatus(p.TranscriptID)
@@ -97,10 +98,10 @@ func (p ProcessFiles) Run() {
 		p.Transcripts.Segments[i].ID = i
 	}
 	p.Step += 1
-	p.WriteJSON()
+	p.WriteJSON(false)
 	time.Sleep(5 * time.Second)
 	p.Step += 1
-	p.WriteJSON()
+	p.WriteJSON(false)
 	p.SaveBackup()
 }
 
@@ -134,26 +135,28 @@ func (p ProcessFiles) AsJSON() string {
 	return string(asJSON)
 }
 
-func (p ProcessFiles) WriteJSON() {
-	if len(p.Transcripts.Segments) > 0 {
+func (p ProcessFiles) WriteJSON(overwrite bool) {
+	if len(p.Transcripts.Segments) > 0 || overwrite {
 		filepath := fmt.Sprintf("/data/recordings/%s.json", p.UUID)
-		f, err := os.Create(filepath)
+		f, err := lockedfile.Create(filepath)
 		if err != nil {
 			revel.AppLog.Error("Unable to create file to save JSON", err)
 		}
-		defer func() {
-			err := f.Close()
+		if err == nil {
+			defer func() {
+				err := f.Close()
+				if err != nil {
+					revel.AppLog.Error("Unable to close JSON file", err)
+				}
+			}()
+			asJSON, err := json.MarshalIndent(p, "", "\t")
 			if err != nil {
-				revel.AppLog.Error("Unable to close JSON file", err)
+				revel.AppLog.Error("Unable to marshal JSON", err)
 			}
-		}()
-		asJSON, err := json.MarshalIndent(p, "", "\t")
-		if err != nil {
-			revel.AppLog.Error("Unable to marshal JSON", err)
-		}
-		_, err = f.Write(asJSON)
-		if err != nil {
-			revel.AppLog.Error("Unable to save JSON", err)
+			_, err = f.Write(asJSON)
+			if err != nil {
+				revel.AppLog.Error("Unable to save JSON", err)
+			}
 		}
 	}
 }

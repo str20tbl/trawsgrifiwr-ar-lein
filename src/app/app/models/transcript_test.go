@@ -109,6 +109,20 @@ func TestTranscript_MergeSegments(t1 *testing.T) {
 			testLength: len(testSegments) - 1,
 		},
 		{
+			name: "Test large list minus numbers",
+			fields: fields{
+				ID:       "",
+				Version:  0,
+				Success:  true,
+				Segments: testSegments,
+			},
+			args: args{
+				IDa: 51,
+				IDb: 50,
+			},
+			testLength: len(testSegments) - 1,
+		},
+		{
 			name: "Test small list content",
 			fields: fields{
 				ID:       "",
@@ -154,6 +168,7 @@ func TestTranscript_MergeSegments_Content(t1 *testing.T) {
 		fields   fields
 		args     args
 		wantText string
+		wantID   int
 	}{
 		{
 			name: "Test small list content",
@@ -181,6 +196,47 @@ func TestTranscript_MergeSegments_Content(t1 *testing.T) {
 				IDb: 1,
 			},
 			wantText: "a b",
+			wantID:   0,
+		},
+		{
+			name: "Test small list content reverse",
+			fields: fields{
+				ID:      "",
+				Version: 0,
+				Success: true,
+				Segments: []Segment{
+					{
+						ID:    0,
+						Start: 0.009,
+						End:   7.876,
+						Text:  "a",
+					},
+					{
+						ID:    1,
+						Start: 8.116,
+						End:   16.364,
+						Text:  "b",
+					},
+					{
+						ID:    2,
+						Start: 17.116,
+						End:   21.364,
+						Text:  "c",
+					},
+					{
+						ID:    3,
+						Start: 21.516,
+						End:   31.364,
+						Text:  "d",
+					},
+				},
+			},
+			args: args{
+				IDa: 2,
+				IDb: 1,
+			},
+			wantText: "b c",
+			wantID:   1,
 		},
 	}
 	for _, tt := range tests {
@@ -191,8 +247,8 @@ func TestTranscript_MergeSegments_Content(t1 *testing.T) {
 				Success:  tt.fields.Success,
 				Segments: tt.fields.Segments,
 			}
-			if t.MergeSegments(tt.args.IDa, tt.args.IDb); t.Segments[tt.args.IDa].Text != tt.wantText {
-				t1.Errorf("MergeSegments() = %v, want %v", t.Segments[tt.args.IDa].Text, tt.wantText)
+			if t.MergeSegments(tt.args.IDa, tt.args.IDb); t.Segments[tt.wantID].Text != tt.wantText {
+				t1.Errorf("MergeSegments() = %v, want %v", t.Segments[tt.wantID].Text, tt.wantText)
 			}
 		})
 	}
@@ -283,6 +339,14 @@ func Test_roundFloat(t *testing.T) {
 				precision: 3,
 			},
 			want: 12.000,
+		},
+		{
+			name: "Test floats no round trim",
+			args: args{
+				val:       12.12345,
+				precision: 3,
+			},
+			want: 12.123,
 		},
 	}
 	for _, tt := range tests {
