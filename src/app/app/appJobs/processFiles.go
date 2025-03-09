@@ -36,6 +36,7 @@ type ProcessFiles struct {
 
 func (p ProcessFiles) Run() {
 	revel.AppLog.Info(p.Filename)
+	p.WriteJSON(true)
 	var err error
 	mp3Filename := fmt.Sprintf("/data/recordings/%s.mp3", p.UUID)
 	wavFilename := fmt.Sprintf("/data/recordings/%s.wav", p.UUID)

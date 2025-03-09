@@ -49,6 +49,15 @@ var tmlpFuncs = template.FuncMap{
 	"len": func(input models.Transcript) int {
 		return len(input.Segments) - 1
 	},
+	"isIntern": func(input string, blackList []string) (fnd bool) {
+		for _, item := range blackList {
+			if input == item {
+				fnd = true
+				break
+			}
+		}
+		return fnd
+	},
 	"notIn": func(uuid string, blackList []string) (fnd bool) {
 		for _, item := range blackList {
 			if uuid == item {

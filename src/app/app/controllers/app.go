@@ -119,7 +119,8 @@ func (c *App) UpdateJSON() revel.Result {
 		originalJSON.Started = time.Now().Format("2006-01-02 15:04")
 	}
 	originalJSON.WriteJSON(false)
-	return c.RenderJSON(`{"success": "True"}`)
+	output := renderTemplate(originalJSON)
+	return c.RenderJSON(output.String())
 }
 
 // Editor display the transcription editor view to the user
