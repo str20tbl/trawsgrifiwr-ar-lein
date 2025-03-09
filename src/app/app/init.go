@@ -55,6 +55,16 @@ func init() {
 		return !fnd
 	}
 
+	revel.TemplateFuncs["isIntern"] = func(input string, blackList []string) (fnd bool) {
+		for _, item := range blackList {
+			if input == item {
+				fnd = true
+				break
+			}
+		}
+		return fnd
+	}
+
 	revel.TemplateFuncs["prevTime"] = func(input models.Transcript, index int) float64 {
 		if index == 0 {
 			return 0.0

@@ -517,6 +517,9 @@
                             audioPlayer.currentTime = syncData[{{.segmentID}}].start;
                             startApp();
                         });
+                        {{if isIntern .data.UUID .UUIDBlackList}}
+                        document.oncontextmenu = document.body.oncontextmenu = function() {return false;}
+                        {{end}}
                     </script>
                 </div>
             </div>
@@ -531,6 +534,7 @@
     </div>
 </div>
 {{template "footer.html" .}}
+
 
 
 
