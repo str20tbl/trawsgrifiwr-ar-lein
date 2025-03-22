@@ -7,14 +7,14 @@ services:
   web:
     build: "./src"
     restart: always
-    container_name: dev-trawsgrifiwr.techiaith.cymru
-    command: ["revel", "run", "-a", ".", "dev"]
+    container_name: trawsgrifiwr.techiaith.cymru
+    command: ["revel", "run", "-a", ".", "prod"]
     volumes:
       - my-volume:/usr/src/app
       - "./src/app:/usr/src/app"
       - "./data/recordings:/data/recordings"
     ports:
-      - "7770:9000"
+      - "7070:9000"
     depends_on:
       - redis
 #  test:
