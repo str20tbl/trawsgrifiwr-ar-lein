@@ -36,4 +36,6 @@ var UUIDBlackList = []string{
 	"de68c6e4-34d1-47eb-9132-6f43c1fe4df7",
 	"8c68b86c-9031-4817-8d49-071b6f18cffo",
 	"d8fc6b05-2efc-4010-81f1-297d58b49348",
+	"7284497a-70d5-4c02-8440-e63136f59014",
+	"05a778cd-758e-4add-a2b2-a9c30f6e8047",
 }
