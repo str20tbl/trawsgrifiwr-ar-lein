@@ -15,8 +15,8 @@ POST	/GetData				                App.GetData
 
 GET     /                                       App.Index
 GET     /Transcribe                             App.Transcribe
-GET     /PlayAudio                              App.PlayAudio
 GET     /Editor                                 App.Editor
+GET     /PlayAudio                              App.PlayAudio
 GET     /ExportSRT                              App.ExportSRT
 GET     /RevertJSON                             App.RevertJSON
 
