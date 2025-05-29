@@ -22,10 +22,6 @@ func (c *App) Index() revel.Result {
 	return c.Render()
 }
 
-func (c *App) Docs() revel.Result {
-	return c.Render()
-}
-
 func (c *App) RevertJSON(uuid string) revel.Result {
 	backup := fetchBackup(uuid)
 	backup.WriteJSON(false)
