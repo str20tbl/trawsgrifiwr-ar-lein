@@ -119,7 +119,7 @@ func (c *App) UpdateJSON() revel.Result {
 	return c.RenderJSON(output.String())
 }
 
-// Editor display the transcription editor view to the user
+// Editor displays the transcription editor view to the user
 func (c *App) Editor(uuid string, segmentID int) revel.Result {
 	data := fetchJSON(uuid)
 	if data.UUID == "" {
