@@ -10,23 +10,20 @@ services:
     container_name: trawsgrifiwr.techiaith.cymru
     command: ["revel", "run", "-a", ".", "prod"]
     volumes:
-      - my-volume:/usr/src/app
       - "./src/app:/usr/src/app"
       - "./data/recordings:/data/recordings"
     ports:
       - "7070:9000"
     depends_on:
       - redis
-#  test:
-#    build:
-#      dockerfile: "./DockerfileTests"
-#    container_name: test-trawsgrifiwr
-#    command: ["go", "test"]
-#    volumes:
-#      - "./src/app:/usr/src/app"
-#      - "./data/recordings:/data/recordings"
-
+  test:
+    build:
+      dockerfile: "./DockerfileTests"
+    container_name: test-trawsgrifiwr
+    command: ["go", "test"]
+    volumes:
+      - "./src/app:/usr/src/app"
+      - "./data/recordings:/data/recordings"
 volumes:
   redis_data: {}
-  my-volume: {}
 
